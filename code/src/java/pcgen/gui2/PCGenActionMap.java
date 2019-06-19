@@ -105,7 +105,6 @@ public final class PCGenActionMap extends ActionMap
 	public static final String HELP_COMMAND = "help";
 	public static final String HELP_DOCS_COMMAND = HELP_COMMAND + ".docs";
 	public static final String HELP_OGL_COMMAND = HELP_COMMAND + ".ogl";
-	public static final String HELP_TIPOFTHEDAY_COMMAND = HELP_COMMAND + ".tod";
 	public static final String HELP_ABOUT_COMMAND = HELP_COMMAND + ".about";
 	private final PCGenFrame frame;
 
@@ -169,7 +168,6 @@ public final class PCGenActionMap extends ActionMap
 		put(HELP_COMMAND, new HelpAction());
 		put(HELP_DOCS_COMMAND, new DocsHelpAction());
 		put(HELP_OGL_COMMAND, new OGLHelpAction());
-		put(HELP_TIPOFTHEDAY_COMMAND, new TipOfTheDayHelpAction());
 		put(HELP_ABOUT_COMMAND, new AboutHelpAction());
 	}
 
@@ -827,22 +825,6 @@ public final class PCGenActionMap extends ActionMap
 		public void actionPerformed(ActionEvent e)
 		{
 			frame.showOGLDialog();
-		}
-
-	}
-
-	private final class TipOfTheDayHelpAction extends PCGenAction
-	{
-
-		private TipOfTheDayHelpAction()
-		{
-			super("mnuHelpTipOfTheDay", HELP_TIPOFTHEDAY_COMMAND, Icons.TipOfTheDay16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			PCGenFrame.showTipsOfTheDay();
 		}
 
 	}
