@@ -85,7 +85,6 @@ import pcgen.gui2.sources.SourceSelectionDialog;
 import pcgen.gui2.tabs.InfoTabbedPane;
 import pcgen.gui2.tools.CharacterSelectionListener;
 import pcgen.gui2.tools.Icons;
-import pcgen.gui2.tools.TipOfTheDayHandler;
 import pcgen.gui2.util.ShowMessageGuiObserver;
 import pcgen.gui3.GuiAssertions;
 import pcgen.gui3.GuiUtility;
@@ -235,27 +234,11 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		{
 			try
 			{
-				boolean alternateStartup = false;
-				alternateStartup |= maybeLoadCampaign();
-				alternateStartup |= maybeLoadOrCreateCharacter();
-				alternateStartup |= maybeStartInGMGen();
-				alternateStartup |= maybeAutoLoadSources();
+				maybeLoadCampaign();
+				maybeLoadOrCreateCharacter();
+				PCGenUIManager.displayGmGen();
+				maybeAutoLoadSources();
 
-				if (!alternateStartup)
-				{
-					//Do a default startup
-					SwingUtilities.invokeLater(() -> {
-						if (TipOfTheDayHandler.shouldShowTipOfTheDay())
-						{
-							showTipsOfTheDay();
-						}
-
-						if (!SourceSelectionDialog.skipSourceSelection())
-						{
-							showSourceSelectionDialog();
-						}
-					});
-				}
 			}
 			catch (InterruptedException | InvocationTargetException ex)
 			{
@@ -399,16 +382,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 			return true;
 		}
 
-		private boolean maybeStartInGMGen()
-		{
-			if (!Main.shouldStartInGMGen())
-			{
-				return false;
-			}
-			PCGenUIManager.displayGmGen();
-			return true;
-		}
-
 	}
 
 	private static InputMap createInputMap(ActionMap actionMap)
@@ -425,7 +398,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		return inputMap;
 	}
 
-	public PCGenActionMap getActionMap()
+	PCGenActionMap getActionMap()
 	{
 		return actionMap;
 	}
@@ -591,7 +564,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * @param character
 	 * @return value from CharacterManager.saveCharacter()
 	 */
-	public boolean reallySaveCharacter(CharacterFacade character)
+	private boolean reallySaveCharacter(CharacterFacade character)
 	{
 		boolean result = false;
 
@@ -676,7 +649,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		CharacterManager.removeCharacter(character);
 	}
 
-	public boolean closeAllCharacters()
+	boolean closeAllCharacters()
 	{
 		final int CLOSE_OPT_CHOOSE = 2;
 		ListFacade<CharacterFacade> characters = CharacterManager.getCharacters();
@@ -920,7 +893,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * new character tab.
 	 * @param character The character being saved.
 	 */
-	public void revertCharacter(CharacterFacade character)
+	void revertCharacter(CharacterFacade character)
 	{
 		if (character.isDirty())
 		{
@@ -1206,7 +1179,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		}).start();
 	}
 
-	public void loadPartyFromFile(final File pcpFile)
+	void loadPartyFromFile(final File pcpFile)
 	{
 		if (!PCGFile.isPCGenPartyFile(pcpFile))
 		{
@@ -1321,7 +1294,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	/**
 	 * display the source selection dialog to the user
 	 */
-	public void showSourceSelectionDialog()
+	void showSourceSelectionDialog()
 	{
 		if (sourceSelectionDialog == null)
 		{
@@ -1507,14 +1480,14 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * has selected. After the sources are loaded the thread then
 	 * displays the licenses for the data.
 	 */
-	private class SourceLoadWorker extends Thread
+	final private class SourceLoadWorker extends Thread
 	{
 
 		private final SourceSelectionFacade sources;
 		private final SourceFileLoader loader;
 		private final SwingWorker<List<LogRecord>, List<LogRecord>> worker;
 
-		public SourceLoadWorker(SourceSelectionFacade sources, UIDelegate delegate)
+		private SourceLoadWorker(SourceSelectionFacade sources, UIDelegate delegate)
 		{
 			this.sources = sources;
 			loader = new SourceFileLoader(sources, delegate);
