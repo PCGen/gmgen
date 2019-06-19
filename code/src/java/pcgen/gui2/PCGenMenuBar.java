@@ -150,7 +150,6 @@ public final class PCGenMenuBar extends JMenuBar implements CharacterSelectionLi
 		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.HELP_DOCS_COMMAND)));
 		menu.addSeparator();
 		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.HELP_OGL_COMMAND)));
-		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.HELP_TIPOFTHEDAY_COMMAND)));
 		menu.addSeparator();
 		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.HELP_ABOUT_COMMAND)));
 		return menu;
