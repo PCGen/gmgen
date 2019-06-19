@@ -88,11 +88,9 @@ import pcgen.gui2.tools.Icons;
 import pcgen.gui2.util.ShowMessageGuiObserver;
 import pcgen.gui3.GuiAssertions;
 import pcgen.gui3.GuiUtility;
-import pcgen.gui3.JFXPanelFromResource;
 import pcgen.gui3.component.PCGenToolBar;
 import pcgen.gui3.dialog.AboutDialog;
 import pcgen.gui3.dialog.RememberingChoiceDialog;
-import pcgen.gui3.dialog.TipOfTheDayController;
 import pcgen.io.PCGFile;
 import pcgen.persistence.SourceFileLoader;
 import pcgen.system.CharacterManager;
@@ -1277,18 +1275,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		title.append("PCGen v");
 		title.append(PCGenPropBundle.getVersionNumber());
 		setTitle(title.toString());
-	}
-
-	/**
-	 * display the tips of the day dialog to the user
-	 */
-	static void showTipsOfTheDay()
-	{
-		var totd = new JFXPanelFromResource<>(
-				TipOfTheDayController.class,
-				"TipOfTheDay.fxml"
-		);
-		totd.showAsStage(LanguageBundle.getString("in_tod_title"));
 	}
 
 	/**
