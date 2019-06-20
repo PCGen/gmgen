@@ -33,8 +33,6 @@ import pcgen.facade.util.event.ReferenceEvent;
 import pcgen.facade.util.event.ReferenceListener;
 import pcgen.gui2.coreview.CoreViewFrame;
 import pcgen.gui2.dialog.DataInstaller;
-import pcgen.gui2.dialog.ExportDialog;
-import pcgen.gui2.dialog.PrintPreviewDialog;
 import pcgen.gui2.solverview.SolverViewFrame;
 import pcgen.gui2.tools.DesktopBrowserLauncher;
 import pcgen.gui2.tools.Icons;
@@ -75,8 +73,6 @@ public final class PCGenActionMap extends ActionMap
 	private static final String CLOSE_PARTY_COMMAND = PARTY_COMMAND + ".close";
 	private static final String SAVE_PARTY_COMMAND = PARTY_COMMAND + ".save";
 	private static final String SAVEAS_PARTY_COMMAND = PARTY_COMMAND + ".saveas";
-	private static final String PRINT_COMMAND = FILE_COMMAND + ".print";
-	private static final String EXPORT_COMMAND = FILE_COMMAND + ".export";
 	private static final String EXIT_COMMAND = FILE_COMMAND + ".exit";
 	//the Edit menu commands
 	private static final String EDIT_COMMAND = "edit";
@@ -142,8 +138,6 @@ public final class PCGenActionMap extends ActionMap
 		put(SAVE_PARTY_COMMAND, new SavePartyAction());
 		put(SAVEAS_PARTY_COMMAND, new SaveAsPartyAction());
 
-		put(PRINT_COMMAND, new PrintAction());
-		put(EXPORT_COMMAND, new ExportAction());
 		put(EXIT_COMMAND, new ExitAction());
 
 		put(EDIT_COMMAND, new EditAction());
@@ -585,38 +579,6 @@ public final class PCGenActionMap extends ActionMap
 		public void actionPerformed(ActionEvent e)
 		{
 			frame.showSavePartyChooser();
-		}
-
-	}
-
-	private final class PrintAction extends CharacterAction
-	{
-
-		private PrintAction()
-		{
-			super("mnuFilePrint", PRINT_COMMAND, "shortcut P", Icons.Print16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			PrintPreviewDialog.showPrintPreviewDialog(frame);
-		}
-
-	}
-
-	private final class ExportAction extends CharacterAction
-	{
-
-		private ExportAction()
-		{
-			super("mnuFileExport", EXPORT_COMMAND, "shift-shortcut P", Icons.Export16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			ExportDialog.showExportDialog(frame);
 		}
 
 	}
