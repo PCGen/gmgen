@@ -111,9 +111,6 @@ public final class InfoTabbedPane extends JTabbedPane implements CharacterSelect
 	{
 		setTabPlacement(SwingConstants.TOP);
 
-		SummaryInfoTab tab = new SummaryInfoTab();
-		addTab(tab);
-		tab.addPropertyChangeListener(new TabActionListener(tab));
 		addTab(new RaceInfoTab());
 		addTab(new TemplateInfoTab());
 		addTab(new ClassInfoTab());
