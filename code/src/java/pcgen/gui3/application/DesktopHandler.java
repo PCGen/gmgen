@@ -84,7 +84,7 @@ public final class DesktopHandler
 		@Override
 		public void handlePreferences(final PreferencesEvent preferencesEvent)
 		{
-			PCGenUIManager.displayPreferencesDialog();
+			// use gmgen prefs
 		}
 	}
 
