@@ -90,11 +90,6 @@ public enum Status
 		}
 	};
 
-	public static Status getDefaultValue()
-	{
-		return Release;
-	}
-
 	public abstract Color getColor();
 
 }

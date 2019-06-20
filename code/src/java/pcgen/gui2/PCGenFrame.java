@@ -77,7 +77,6 @@ import pcgen.facade.util.event.ReferenceListener;
 import pcgen.gui2.dialog.ChooserDialog;
 import pcgen.gui2.dialog.PostLevelUpDialog;
 import pcgen.gui2.dialog.RadioChooserDialog;
-import pcgen.gui2.sources.SourceSelectionDialog;
 import pcgen.gui2.tools.CharacterSelectionListener;
 import pcgen.gui2.tools.Icons;
 import pcgen.gui2.util.ShowMessageGuiObserver;
@@ -573,7 +572,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		if (!tobeSaved.isEmpty())
 		{
 			if (savingAll
-				|| showMessageConfirm(Constants.APPLICATION_NAME,
+				|| showMessageConfirm(
 					LanguageBundle.getString("in_unsavedCompanions"))) //$NON-NLS-1$
 			{
 				for (CompanionFacade companionFacade : tobeSaved)
@@ -588,7 +587,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 			&& (master.getFileRef().get() == null || StringUtils.isEmpty(master.getFileRef().get().getName())))
 		{
 			if (savingAll
-				|| showMessageConfirm(Constants.APPLICATION_NAME,
+				|| showMessageConfirm(
 					LanguageBundle.getString("in_unsavedMaster"))) //$NON-NLS-1$
 			{
 				CharacterFacade masterChar = CharacterManager.getCharacterMatching(master);
@@ -1246,18 +1245,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		setTitle(title.toString());
 	}
 
-	/**
-	 * display the source selection dialog to the user
-	 */
-	void showSourceSelectionDialog()
-	{
-		if (sourceSelectionDialog == null)
-		{
-			sourceSelectionDialog = new SourceSelectionDialog(this, uiContext);
-		}
-		sourceSelectionDialog.setLocationRelativeTo(this);
-		sourceSelectionDialog.setVisible(true);
-	}
 
 	//TODO: This should be in a utility class.
 	/**
@@ -1351,10 +1338,10 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		return buttonType.orElse(ButtonType.NO).equals(ButtonType.OK);
 	}
 
-	private boolean showMessageConfirm(String title, String message)
+	private boolean showMessageConfirm(String message)
 	{
 		JComponent msgComp = new JLabel(message);
-		int ret = JOptionPane.showConfirmDialog(this, msgComp, title, JOptionPane.YES_NO_OPTION);
+		int ret = JOptionPane.showConfirmDialog(this, msgComp, Constants.APPLICATION_NAME, JOptionPane.YES_NO_OPTION);
 		return ret == JOptionPane.YES_OPTION;
 	}
 

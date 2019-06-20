@@ -36,8 +36,6 @@ public final class Comparators
 	}
 
 	private static final Comparator<Object> tSC = new ToStringComparator();
-	private static final Comparator<Object> tSICC = new ToStringIgnoreCaseComparator();
-	private static final Comparator<Object> tSICCol = new ToStringIgnoreCaseCollator();
 	private static final Comparator<Integer> iC = Comparator.comparingInt(o -> o);
 	private static final Comparator<Number> nC = Comparator.comparing(Number::doubleValue);
 	private static final Comparator<Date> DC = Comparator.comparing(Date::getTime);
@@ -46,16 +44,6 @@ public final class Comparators
 	private static Comparator<Object> toStringComparator()
 	{
 		return tSC;
-	}
-
-	public static Comparator<Object> toStringIgnoreCaseComparator()
-	{
-		return tSICC;
-	}
-
-	public static Comparator<Object> toStringIgnoreCaseCollator()
-	{
-		return tSICCol;
 	}
 
 	public static <T> Comparator<? super T> getComparatorFor(Class<T> c)
