@@ -62,7 +62,6 @@ import pcgen.cdom.facet.model.TemplateFacet;
 import pcgen.cdom.helper.ClassSource;
 import pcgen.cdom.inst.PCClassLevel;
 import pcgen.cdom.meta.CorePerspective;
-import pcgen.cdom.reference.CDOMDirectSingleRef;
 import pcgen.cdom.reference.CDOMSingleRef;
 import pcgen.cdom.util.CControl;
 import pcgen.core.Ability;
@@ -130,7 +129,6 @@ import pcgen.facade.core.InfoFactory;
 import pcgen.facade.core.SpellSupportFacade;
 import pcgen.facade.core.TempBonusFacade;
 import pcgen.facade.core.UIDelegate;
-import pcgen.facade.core.UIDelegate.CustomEquipResult;
 import pcgen.facade.util.DefaultListFacade;
 import pcgen.facade.util.DefaultReferenceFacade;
 import pcgen.facade.util.ListFacade;
@@ -2403,29 +2401,6 @@ public class CharacterFacadeImpl
 		}
 
 		return (purchaseQty * rate.intValue()) * (float) 0.01 * selected.getCost(theCharacter).floatValue();
-	}
-
-	private Equipment openCustomizer(Equipment aEq)
-	{
-		if (aEq == null)
-		{
-			return null;
-		}
-
-		Equipment newEquip = aEq.clone();
-		if (!newEquip.containsKey(ObjectKey.BASE_ITEM))
-		{
-			newEquip.put(ObjectKey.BASE_ITEM, CDOMDirectSingleRef.getRef(aEq));
-		}
-
-		EquipmentBuilderFacadeImpl builder = new EquipmentBuilderFacadeImpl(newEquip, theCharacter, delegate);
-		CustomEquipResult result = delegate.showCustomEquipDialog(this, builder);
-		if (result != CustomEquipResult.CANCELLED)
-		{
-			dataSet.addEquipment(newEquip);
-		}
-		//TODO if this is returning null, then the SolverManager needs to destroy the unused channels :/
-		return result == CustomEquipResult.PURCHASE ? newEquip : null;
 	}
 
 	@Override

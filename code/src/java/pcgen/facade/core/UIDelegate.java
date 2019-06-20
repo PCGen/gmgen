@@ -108,15 +108,6 @@ public interface UIDelegate
 	Optional<String> showInputDialog(String title, String message, String initialValue);
 
 	/**
-	 * Present a dialog to the user to allow them to build up a custom 
-	 * piece of equipment.
-	 * @param character The character the equipment would be for.
-	 * @param equipBuilder The EquipmentBuilderFacade instance to be used for creating the item.
-	 * @return The result of the dialog.
-	 */
-	public CustomEquipResult showCustomEquipDialog(CharacterFacade character, EquipmentBuilderFacade equipBuilder);
-
-	/**
 	 * The result of creation of a custom equipment item.
 	 */
 	public enum CustomEquipResult
@@ -124,11 +115,4 @@ public interface UIDelegate
 		CANCELLED, OK, PURCHASE;
 	}
 
-	/**
-	 * Present a dialog to the user to allow them to build up a custom 
-	 * spell.
-	 * @param spellBuilderFacade The SpellBuilderFacade instance to be used for creating the spell.
-	 * @return true if the spell was built, false if it was cancelled.
-	 */
-	public boolean showCustomSpellDialog(SpellBuilderFacade spellBuilderFacade);
 }
