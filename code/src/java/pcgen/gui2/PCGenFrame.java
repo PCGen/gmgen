@@ -125,7 +125,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	private final PCGenActionMap actionMap;
 	private final CharacterTabs characterTabs;
 	private final PCGenStatusBar statusBar;
-	private final PCGenMenuBar pcGenMenuBar;
 
 	/**
 	 * The context indicating what items are currently loaded/being processed in the UI
@@ -159,7 +158,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		Observer messageObserver = new ShowMessageGuiObserver(this);
 		ShowMessageDelegate.getInstance().addObserver(messageObserver);
 		ChooserFactory.setDelegate(this);
-		this.pcGenMenuBar = new PCGenMenuBar(this, uiContext);
 		initComponents();
 		pack();
 		initSettings();
@@ -178,7 +176,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 
 		characterTabs.add(new InfoGuidePane(this, uiContext));
 
-		setJMenuBar(pcGenMenuBar);
 		PCGenToolBar pcGenToolBar = new PCGenToolBar(this);
 		ToolBar toolBar = pcGenToolBar.buildMenu();
 		JFXPanel wrappedToolBar = GuiUtility.wrapParentAsJFXPanel(toolBar);
@@ -406,10 +403,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		if (character != null && character.getFileRef() != null)
 		{
 			character.getFileRef().addReferenceListener(filenameListener);
-		}
-		if (character != null)
-		{
-			pcGenMenuBar.setCharacter(character);
 		}
 	}
 
