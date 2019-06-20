@@ -44,18 +44,14 @@ import pcgen.cdom.base.Constants;
 import pcgen.cdom.content.CNAbility;
 import pcgen.cdom.enumeration.BiographyField;
 import pcgen.cdom.enumeration.CharID;
-import pcgen.cdom.enumeration.EquipmentLocation;
 import pcgen.cdom.enumeration.Gender;
 import pcgen.cdom.enumeration.Handed;
 import pcgen.cdom.enumeration.IntegerKey;
 import pcgen.cdom.enumeration.ListKey;
-import pcgen.cdom.enumeration.Nature;
 import pcgen.cdom.enumeration.NumericPCAttribute;
 import pcgen.cdom.enumeration.ObjectKey;
 import pcgen.cdom.enumeration.PCStringKey;
 import pcgen.cdom.enumeration.SkillFilter;
-import pcgen.cdom.enumeration.StringKey;
-import pcgen.cdom.enumeration.Type;
 import pcgen.cdom.facet.AutoEquipmentFacet;
 import pcgen.cdom.facet.FacetLibrary;
 import pcgen.cdom.facet.event.DataFacetChangeEvent;
@@ -94,18 +90,14 @@ import pcgen.core.Race;
 import pcgen.core.RollingMethods;
 import pcgen.core.RuleConstants;
 import pcgen.core.SettingsHandler;
-import pcgen.core.SizeAdjustment;
 import pcgen.core.Skill;
 import pcgen.core.VariableProcessor;
 import pcgen.core.analysis.DomainApplication;
 import pcgen.core.analysis.RaceUtilities;
 import pcgen.core.analysis.SkillRankControl;
-import pcgen.core.analysis.SpellCountCalc;
 import pcgen.core.character.CharacterSpell;
 import pcgen.core.character.EquipSet;
 import pcgen.core.character.Follower;
-import pcgen.core.chooser.ChoiceManagerList;
-import pcgen.core.chooser.ChooserUtilities;
 import pcgen.core.display.BonusDisplay;
 import pcgen.core.display.CharacterDisplay;
 import pcgen.core.kit.BaseKit;
@@ -135,11 +127,8 @@ import pcgen.facade.core.EquipmentSetFacade;
 import pcgen.facade.core.GearBuySellFacade;
 import pcgen.facade.core.InfoFacade;
 import pcgen.facade.core.InfoFactory;
-import pcgen.facade.core.LanguageChooserFacade;
-import pcgen.facade.core.SpellFacade;
 import pcgen.facade.core.SpellSupportFacade;
 import pcgen.facade.core.TempBonusFacade;
-import pcgen.facade.core.TodoFacade;
 import pcgen.facade.core.UIDelegate;
 import pcgen.facade.core.UIDelegate.CustomEquipResult;
 import pcgen.facade.util.DefaultListFacade;
@@ -149,7 +138,6 @@ import pcgen.facade.util.ListFacades;
 import pcgen.facade.util.ReferenceFacade;
 import pcgen.facade.util.WriteableListFacade;
 import pcgen.facade.util.WriteableReferenceFacade;
-import pcgen.facade.util.event.ChangeListener;
 import pcgen.facade.util.event.ListEvent;
 import pcgen.facade.util.event.ListListener;
 import pcgen.gui2.UIPropertyContext;
@@ -169,7 +157,6 @@ import pcgen.system.PCGenSettings;
 import pcgen.util.Logging;
 import pcgen.util.enumeration.Load;
 import pcgen.util.enumeration.Tab;
-import pcgen.util.enumeration.View;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -637,111 +624,9 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public ListFacade<AbilityCategory> getActiveAbilityCategories()
-	{
-		return characterAbilities.getActiveAbilityCategories();
-	}
-
-	@Override
-	public int getTotalSelections(AbilityCategory category)
-	{
-		return characterAbilities.getTotalSelections(category);
-	}
-
-	@Override
 	public int getRemainingSelections(AbilityCategory category)
 	{
 		return characterAbilities.getRemainingSelections(category);
-	}
-
-	@Override
-	public void addAbilityCatSelectionListener(ChangeListener listener)
-	{
-		characterAbilities.addAbilityCatSelectionListener(listener);
-	}
-
-	@Override
-	public void removeAbilityCatSelectionListener(ChangeListener listener)
-	{
-		characterAbilities.removeAbilityCatSelectionListener(listener);
-	}
-
-	@Override
-	public void setRemainingSelection(AbilityCategory category, int remaining)
-	{
-		characterAbilities.setRemainingSelection(category, remaining);
-	}
-
-	@Override
-	public Nature getAbilityNature(AbilityFacade ability)
-	{
-		if (ability == null || !(ability instanceof Ability))
-		{
-			return null;
-		}
-		/*
-		 * TODO This is making a somewhat DRASTIC assumption that ANY Ability
-		 * Category is appropriate. Unfortunately, the point at which this
-		 * method is called from the UI it is unclear to the untrained eye how
-		 * to get the category.
-		 */
-		List<CNAbility> cnas = theCharacter.getMatchingCNAbilities((Ability) ability);
-		Nature nature = null;
-		for (CNAbility cna : cnas)
-		{
-			nature = Nature.getBestNature(nature, cna.getNature());
-		}
-		return nature;
-	}
-
-	@Override
-	public void addCharacterLevels(PCClass[] classes)
-	{
-		SettingsHandler.setShowHPDialogAtLevelUp(false);
-		//SettingsHandler.setShowStatDialogAtLevelUp(false);
-
-		int oldLevel = charLevelsFacade.getSize();
-		boolean needFullRefresh = false;
-
-		for (PCClass pcClass : classes)
-		{
-			int totalLevels = charDisplay.getTotalLevels();
-			if (!validateAddLevel(pcClass))
-			{
-				return;
-			}
-			Logging.log(Logging.INFO,
-				charDisplay.getName() + ": Adding level " + (totalLevels + 1) //$NON-NLS-1$
-					+ " in class " + pcClass); //$NON-NLS-1$
-			theCharacter.incrementClassLevel(1, pcClass);
-			if (totalLevels == charDisplay.getTotalLevels())
-			{
-				// The level change was rejected - no further processing needed.
-				return;
-			}
-			if (pcClass.containsKey(ObjectKey.EXCHANGE_LEVEL))
-			{
-				needFullRefresh = true;
-			}
-			if (!pcClasses.contains(pcClass))
-			{
-				pcClasses.add(pcClass);
-			}
-			CharacterLevelFacadeImpl cl = new CharacterLevelFacadeImpl(pcClass, charLevelsFacade.getSize() + 1);
-			pcClassLevels.addElement(cl);
-			charLevelsFacade.addLevelOfClass(cl);
-		}
-		CharacterUtils.selectClothes(getTheCharacter());
-
-		// Calculate any active bonuses
-		theCharacter.calcActiveBonuses();
-
-		if (needFullRefresh)
-		{
-			refreshClassLevelModel();
-		}
-		postLevellingUpdates();
-		delegate.showLevelUpInfo(this, oldLevel);
 	}
 
 	/**
@@ -783,43 +668,6 @@ public class CharacterFacadeImpl
 	{
 		weightRef.set(Globals.getGameModeUnitSet().convertWeightToUnitSet(charDisplay.getWeight()));
 		heightRef.set((int) Math.round(Globals.getGameModeUnitSet().convertHeightToUnitSet(charDisplay.getHeight())));
-	}
-
-	@Override
-	public void removeCharacterLevels(int levels)
-	{
-		for (int i = levels; i > 0 && !pcClassLevels.isEmpty(); i--)
-		{
-			PCClass pcClass =
-					charLevelsFacade.getClassTaken(pcClassLevels.getElementAt(pcClassLevels.getSize() - 1));
-			pcClassLevels.removeElement(pcClassLevels.getSize() - 1);
-			Logging.log(Logging.INFO,
-				charDisplay.getName() + ": Removing level " //$NON-NLS-1$
-					+ (pcClassLevels.getSize() + 1) + " in class " + pcClass); //$NON-NLS-1$
-			theCharacter.incrementClassLevel(-1, pcClass);
-			charLevelsFacade.removeLastLevel();
-		}
-
-		// Clean up the class list 
-		for (Iterator<PCClass> iterator = pcClasses.iterator(); iterator.hasNext();)
-		{
-			PCClass pcClass = iterator.next();
-			boolean stillPresent = false;
-			for (CharacterLevelFacade charLevel : pcClassLevels)
-			{
-				if (charLevelsFacade.getClassTaken(charLevel) == pcClass)
-				{
-					stillPresent = true;
-					break;
-				}
-			}
-
-			if (!stillPresent)
-			{
-				iterator.remove();
-			}
-		}
-		postLevellingUpdates();
 	}
 
 	/**
@@ -1089,12 +937,6 @@ public class CharacterFacadeImpl
 		}
 	}
 
-	@Override
-	public ListFacade<TempBonusFacade> getAvailableTempBonuses()
-	{
-		return availTempBonuses;
-	}
-
 	/**
 	 * Build up the list of temporary bonuses which have been applied to this character.
 	 */
@@ -1177,34 +1019,6 @@ public class CharacterFacadeImpl
 		appliedTempBonuses.removeElement(tempBonus);
 		refreshStatScores();
 		postLevellingUpdates();
-	}
-
-	@Override
-	public void setTempBonusActive(TempBonusFacade bonusFacade, boolean active)
-	{
-		if (bonusFacade == null || !(bonusFacade instanceof TempBonusFacadeImpl))
-		{
-			return;
-		}
-		TempBonusFacadeImpl tempBonus = (TempBonusFacadeImpl) bonusFacade;
-
-		if (active)
-		{
-			theCharacter.unsetTempBonusFilter(tempBonus.toString());
-		}
-		else
-		{
-			theCharacter.setTempBonusFilter(tempBonus.toString());
-		}
-		tempBonus.setActive(active);
-		appliedTempBonuses.modifyElement(tempBonus);
-		refreshStatScores();
-	}
-
-	@Override
-	public ListFacade<TempBonusFacade> getTempBonuses()
-	{
-		return appliedTempBonuses;
 	}
 
 	@Override
@@ -1339,12 +1153,6 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public ListFacade<EquipmentSetFacade> getEquipmentSets()
-	{
-		return equipmentSets;
-	}
-
-	@Override
 	public ReferenceFacade<Gender> getGenderRef()
 	{
 		return gender;
@@ -1377,16 +1185,6 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public int getModTotal(PCStat stat)
-	{
-		if (!charDisplay.isNonAbility(stat))
-		{
-			return theCharacter.getStatModFor(stat);
-		}
-		return 0;
-	}
-
-	@Override
 	public ReferenceFacade<Number> getScoreBaseRef(PCStat stat)
 	{
 		WriteableReferenceFacade<Number> score = statScoreMap.get(stat);
@@ -1396,137 +1194,6 @@ public class CharacterFacadeImpl
 			statScoreMap.put(stat, score);
 		}
 		return score;
-	}
-
-	@Override
-	public int getScoreBase(PCStat stat)
-	{
-		return theCharacter.getBaseStatFor(stat);
-	}
-
-	@Override
-	public String getScoreTotalString(PCStat stat)
-	{
-		if (charDisplay.isNonAbility(stat))
-		{
-			return "*"; //$NON-NLS-1$
-		}
-
-		return SettingsHandler.getGame().getStatDisplayText(theCharacter.getTotalStatFor(stat));
-	}
-
-	@Override
-	public int getScoreRaceBonus(PCStat stat)
-	{
-		if (charDisplay.isNonAbility(stat))
-		{
-			return 0;
-		}
-
-		int rBonus = (int) theCharacter.getRaceBonusTo("STAT", stat.getKeyName()); //$NON-NLS-1$
-		rBonus += (int) theCharacter.getBonusDueToType("STAT", stat.getKeyName(), "RACIAL");
-
-		return rBonus;
-	}
-
-	@Override
-	public int getScoreOtherBonus(PCStat stat)
-	{
-		if (charDisplay.isNonAbility(stat))
-		{
-			return 0;
-		}
-
-		int iRace = (int) theCharacter.getRaceBonusTo("STAT", stat.getKeyName()); //$NON-NLS-1$
-		iRace += (int) theCharacter.getBonusDueToType("STAT", stat.getKeyName(), "RACIAL");
-
-		return theCharacter.getTotalStatFor(stat) - theCharacter.getBaseStatFor(stat) - iRace;
-	}
-
-	@Override
-	public void setScoreBase(PCStat stat, int score)
-	{
-		WriteableReferenceFacade<Number> facade = statScoreMap.get(stat);
-		if (facade == null)
-		{
-			facade = getStatReferenceFacade(stat);
-			facade.set(score);
-			statScoreMap.put(stat, facade);
-		}
-
-		PCStat pcStat = null;
-		final int pcPlayerLevels = charDisplay.totalNonMonsterLevels();
-		Collection<PCStat> pcStatList = charDisplay.getStatSet();
-		for (PCStat aStat : pcStatList)
-		{
-			if (stat.getKeyName().equals(aStat.getKeyName()))
-			{
-				pcStat = aStat;
-				break;
-			}
-		}
-		if (pcStat == null)
-		{
-			Logging.errorPrint("Unexpected stat '" + stat + "' found - ignoring.");
-			return;
-		}
-
-		// Checking for bounds, locked stats and pool points
-		String errorMsg = validateNewStatBaseScore(score, pcStat, pcPlayerLevels);
-		if (StringUtils.isNotBlank(errorMsg))
-		{
-			delegate.showErrorMessage(Constants.APPLICATION_NAME, errorMsg);
-			return;
-		}
-
-		final int baseScore = charDisplay.getStat(pcStat);
-		// Deal with a point pool based game mode where you buy skills and feats as well as stats
-		if (Globals.getGameModeHasPointPool())
-		{
-			if (pcPlayerLevels > 0)
-			{
-				int poolMod =
-						getPurchaseCostForStat(theCharacter, score) - getPurchaseCostForStat(theCharacter, baseScore);
-				//
-				// Adding to stat
-				//
-				if (poolMod > 0)
-				{
-					if (poolMod > theCharacter.getSkillPoints())
-					{
-						delegate.showErrorMessage(Constants.APPLICATION_NAME,
-							LanguageBundle.getFormattedString("in_sumStatPoolEmpty", Globals //$NON-NLS-1$
-								.getGameModePointPoolName()));
-						return;
-					}
-				}
-				else if (poolMod < 0)
-				{
-					if (theCharacter.getStatIncrease(pcStat, true) < Math.abs(score - baseScore))
-					{
-						delegate.showErrorMessage(Constants.APPLICATION_NAME,
-							LanguageBundle.getString("in_sumStatStartedHigher")); //$NON-NLS-1$
-						return;
-					}
-				}
-
-				theCharacter.adjustAbilities(AbilityCategory.FEAT, new BigDecimal(-poolMod));
-				showPointPool();
-			}
-		}
-
-		theCharacter.setStat(pcStat, score);
-		facade.set(score);
-		theCharacter.saveStatIncrease(pcStat, score - baseScore, false);
-		theCharacter.calcActiveBonuses();
-		hpRef.set(theCharacter.hitPoints());
-		refreshLanguageList();
-
-		updateScorePurchasePool(true);
-		if (charLevelsFacade != null)
-		{
-			charLevelsFacade.fireSkillBonusEvent(this, 0, true);
-		}
 	}
 
 	/**
@@ -1579,27 +1246,6 @@ public class CharacterFacadeImpl
 		return null;
 	}
 
-	@Override
-	public void rollStats()
-	{
-		GameMode game = dataSet.getGameMode();
-		int rollMethod = game.getRollMethod();
-		if (rollMethod == Constants.CHARACTER_STAT_METHOD_ROLLED && game.getCurrentRollingMethod() == null)
-		{
-			return;
-		}
-		if (rollMethod == Constants.CHARACTER_STAT_METHOD_USER)
-		{
-			// If a user asks to roll in user mode, set it to the current all same value.
-			rollMethod = Constants.CHARACTER_STAT_METHOD_ALL_THE_SAME;
-		}
-		theCharacter.rollStats(rollMethod);
-		//XXX This is here to stop the stat mod from being stale. Can be removed once we merge with CDOM
-		theCharacter.calcActiveBonuses();
-		refreshStatScores();
-		updateScorePurchasePool(true);
-	}
-
 	private void refreshStatScores()
 	{
 		if (charLevelsFacade != null)
@@ -1607,12 +1253,6 @@ public class CharacterFacadeImpl
 			charLevelsFacade.fireSkillBonusEvent(this, 0, true);
 			charLevelsFacade.updateSkillsTodo();
 		}
-	}
-
-	@Override
-	public boolean isStatRollEnabled()
-	{
-		return (charLevelsFacade.getSize() == 0);
 	}
 
 	/**
@@ -1722,13 +1362,6 @@ public class CharacterFacadeImpl
 	public ReferenceFacade<String> getTabNameRef()
 	{
 		return tabName;
-	}
-
-	@Override
-	public void setTabName(String name)
-	{
-		tabName.set(name);
-		theCharacter.setPCAttribute(PCStringKey.TABNAME, name);
 	}
 
 	@Override
@@ -2100,31 +1733,6 @@ public class CharacterFacadeImpl
 		}
 	}
 
-	@Override
-	public ReferenceFacade<EquipmentSetFacade> getEquipmentSetRef()
-	{
-		return equipSet;
-	}
-
-	@Override
-	public void setEquipmentSet(EquipmentSetFacade set)
-	{
-		EquipmentSetFacade oldSet = equipSet.get();
-		if (oldSet != null)
-		{
-			oldSet.getEquippedItems().removeListListener(this);
-			oldSet.getEquippedItems().removeEquipmentListListener(this);
-		}
-		if (set instanceof EquipmentSetFacadeImpl)
-		{
-			((EquipmentSetFacadeImpl) set).activateEquipSet();
-		}
-		equipSet.set(set);
-		set.getEquippedItems().addListListener(this);
-		set.getEquippedItems().addEquipmentListListener(this);
-		refreshTotalWeight();
-	}
-
 	/**
 	 * Regenerate the character's list of languages.
 	 */
@@ -2211,41 +1819,6 @@ public class CharacterFacadeImpl
 	public ListFacade<Language> getLanguages()
 	{
 		return languages;
-	}
-
-	@Override
-	public ListFacade<LanguageChooserFacade> getLanguageChoosers()
-	{
-		CNAbility cna = theCharacter.getBonusLanguageAbility();
-		WriteableListFacade<LanguageChooserFacade> chooserList = new DefaultListFacade<>();
-		chooserList.addElement(
-			new LanguageChooserFacadeImpl(this, LanguageBundle.getString("in_sumLangBonus"), cna)); //$NON-NLS-1$
-
-		Skill speakLangSkill = dataSet.getSpeakLanguageSkill();
-		if (speakLangSkill != null)
-		{
-			chooserList.addElement(
-				new LanguageChooserFacadeImpl(this, LanguageBundle.getString("in_sumLangSkill"), //$NON-NLS-1$
-				speakLangSkill));
-		}
-		return chooserList;
-	}
-
-	@Override
-	public void removeLanguage(Language lang)
-	{
-		ChooseDriver owner = getLaguageOwner(lang);
-		if (owner == null)
-		{
-			return;
-		}
-
-		List<Language> availLangs = new ArrayList<>();
-		List<Language> selLangs = new ArrayList<>();
-		ChoiceManagerList<Language> choiceManager = ChooserUtilities.getChoiceManager(owner, theCharacter);
-		choiceManager.getChoices(theCharacter, availLangs, selLangs);
-		selLangs.remove(lang);
-		choiceManager.applyChoices(theCharacter, selLangs);
 	}
 
 	/**
@@ -2452,12 +2025,6 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public boolean isQualifiedFor(PCClass c)
-	{
-		return theCharacter.isQualified(c);
-	}
-
-	@Override
 	public UIDelegate getUIDelegate()
 	{
 		return delegate;
@@ -2489,23 +2056,6 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public boolean isRemovable(Language language)
-	{
-		if (isAutomatic(language))
-		{
-			return false;
-		}
-		if (currBonusLangs.contains(language))
-		{
-			boolean allowBonusLangAfterFirst = Globals.checkRule(RuleConstants.INTBONUSLANG);
-			boolean atFirstLvl = theCharacter.getTotalLevels() <= 1;
-			return allowBonusLangAfterFirst || atFirstLvl;
-		}
-
-		return true;
-	}
-
-	@Override
 	public CharacterLevelsFacade getCharacterLevelsFacade()
 	{
 		return charLevelsFacade;
@@ -2528,42 +2078,6 @@ public class CharacterFacadeImpl
 		theCharacter.setXP(xp);
 	}
 
-	@Override
-	public ReferenceFacade<Integer> getXPRef()
-	{
-		return currentXP;
-	}
-
-	@Override
-	public void adjustXP(final int xp)
-	{
-		int currVal = currentXP.get();
-		int newVal = currVal + xp;
-		theCharacter.setXP(newVal);
-		checkForNewLevel();
-	}
-
-	@Override
-	public ReferenceFacade<Integer> getXPForNextLevelRef()
-	{
-		return xpForNextlevel;
-	}
-
-	@Override
-	public ReferenceFacade<String> getXPTableNameRef()
-	{
-		return xpTableName;
-	}
-
-	@Override
-	public void setXPTable(String newTable)
-	{
-
-		xpTableName.set(newTable);
-		theCharacter.setXPTable(newTable);
-		checkForNewLevel();
-	}
-
 	private void checkForNewLevel()
 	{
 		currentXP.set(theCharacter.getXP());
@@ -2577,12 +2091,6 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public ReferenceFacade<String> getCharacterTypeRef()
-	{
-		return characterType;
-	}
-
-	@Override
 	public void setCharacterType(String newType)
 	{
 
@@ -2592,32 +2100,6 @@ public class CharacterFacadeImpl
 
 		// This can affect traits mainly.
 		characterAbilities.rebuildAbilityLists();
-	}
-
-	@Override
-	public ReferenceFacade<String> getPreviewSheetRef()
-	{
-		return previewSheet;
-	}
-
-	@Override
-	public void setPreviewSheet(String newSheet)
-	{
-		previewSheet.set(newSheet);
-		theCharacter.setPreviewSheet(newSheet);
-	}
-
-	@Override
-	public ReferenceFacade<SkillFilter> getSkillFilterRef()
-	{
-		return skillFilter;
-	}
-
-	@Override
-	public void setSkillFilter(SkillFilter newFilter)
-	{
-		skillFilter.set(newFilter);
-		theCharacter.setSkillFilter(newFilter);
 	}
 
 	@Override
@@ -2821,88 +2303,12 @@ public class CharacterFacadeImpl
 		return pcPlayerLevels <= maxDiddleLevel;
 	}
 
-	@Override
-	public ReferenceFacade<String> getStatTotalLabelTextRef()
-	{
-		return statTotalLabelText;
-	}
-
-	@Override
-	public ReferenceFacade<String> getStatTotalTextRef()
-	{
-		return statTotalText;
-	}
-
-	/**
-	 * @return A reference to the label text for the character's modifier total
-	 */
-	@Override
-	public ReferenceFacade<String> getModTotalLabelTextRef()
-	{
-		return modTotalLabelText;
-	}
-
-	/**
-	 * @return A reference to the text for the character's modifier total
-	 */
-	@Override
-	public ReferenceFacade<String> getModTotalTextRef()
-	{
-		return modTotalText;
-	}
-
-	@Override
-	public ListFacade<TodoFacade> getTodoList()
-	{
-		return todoManager.getTodoList();
-	}
-
 	/**
 	 * @return the PlayerCharacter the facade is fronting for.
 	 */
 	PlayerCharacter getTheCharacter()
 	{
 		return theCharacter;
-	}
-
-	@Override
-	public ReferenceFacade<Integer> getTotalHPRef()
-	{
-		return hpRef;
-	}
-
-	@Override
-	public ReferenceFacade<Integer> getRollMethodRef()
-	{
-		return rollMethodRef;
-	}
-
-	@Override
-	public void refreshRollMethod()
-	{
-		if (!canChangePurchasePool())
-		{
-			return;
-		}
-		GameMode game = dataSet.getGameMode();
-		rollMethodRef.set(game.getRollMethod());
-		if (SettingsHandler.getGame().isPurchaseStatMode())
-		{
-			int availablePool = RollingMethods.roll(SettingsHandler.getGame().getPurchaseModeMethodPoolFormula());
-			theCharacter.setPointBuyPoints(availablePool);
-
-			// Make sure all scores are within the valid range
-			statScoreMap.forEach((key, score) -> {
-				if (score.get().intValue() < SettingsHandler.getGame().getPurchaseScoreMin(theCharacter))
-				{
-					setStatToPurchaseNeutral(key, score);
-				}
-			});
-
-		}
-
-		hpRef.set(theCharacter.hitPoints());
-		updateScorePurchasePool(false);
 	}
 
 	/**
@@ -2929,47 +2335,10 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public void adjustFunds(BigDecimal modVal)
-	{
-		BigDecimal currFunds = theCharacter.getGold();
-		theCharacter.setGold(currFunds.add(modVal));
-		updateWealthFields();
-	}
-
-	@Override
 	public void setFunds(BigDecimal newVal)
 	{
 		theCharacter.setGold(newVal);
 		updateWealthFields();
-	}
-
-	@Override
-	public ReferenceFacade<BigDecimal> getFundsRef()
-	{
-		return fundsRef;
-	}
-
-	@Override
-	public ReferenceFacade<BigDecimal> getWealthRef()
-	{
-		return wealthRef;
-	}
-
-	@Override
-	public ReferenceFacade<GearBuySellFacade> getGearBuySellRef()
-	{
-		return gearBuySellSchemeRef;
-	}
-
-	@Override
-	public void setGearBuySellRef(GearBuySellFacade gearBuySell)
-	{
-		gearBuySellSchemeRef.set(gearBuySell);
-		GearBuySellScheme scheme = (GearBuySellScheme) gearBuySell;
-		int rate = scheme.getBuyRate().intValue();
-		SettingsHandler.setGearTab_BuyRate(rate);
-		rate = scheme.getSellRate().intValue();
-		SettingsHandler.setGearTab_SellRate(rate);
 	}
 
 	/**
@@ -2985,96 +2354,6 @@ public class CharacterFacadeImpl
 	public void setAllowDebt(boolean allowDebt)
 	{
 		this.allowDebt = allowDebt;
-	}
-
-	@Override
-	public boolean isAllowDebt()
-	{
-		return allowDebt;
-	}
-
-	@Override
-	public EquipmentListFacade getPurchasedEquipment()
-	{
-		return purchasedEquip;
-	}
-
-	@Override
-	public void addPurchasedEquipment(EquipmentFacade equipment, int quantity, boolean customize, boolean free)
-	{
-		if (equipment == null || quantity <= 0)
-		{
-			return;
-		}
-
-		//		int nextOutputIndex = 1;
-		Equipment equipItemToAdjust = (Equipment) equipment;
-
-		if (customize)
-		{
-			equipItemToAdjust = openCustomizer(equipItemToAdjust);
-			if (equipItemToAdjust == null)
-			{
-				return;
-			}
-		}
-		else
-		{
-			if (equipItemToAdjust.getSafe(ObjectKey.MOD_CONTROL).getModifiersRequired())
-			{
-				if (!hasBeenAdjusted(equipItemToAdjust))
-				{
-					delegate.showErrorMessage(Constants.APPLICATION_NAME,
-						LanguageBundle.getString("in_igBuyMustCustomizeItemFirst")); //$NON-NLS-1$
-
-					return;
-				}
-			}
-		}
-		Equipment updatedItem = theCharacter.getEquipmentNamed(equipItemToAdjust.getName());
-
-		if (!free && !canAfford(equipItemToAdjust, quantity, (GearBuySellScheme) gearBuySellSchemeRef.get()))
-		{
-			delegate.showInfoMessage(Constants.APPLICATION_NAME,
-				LanguageBundle.getFormattedString("in_igBuyInsufficientFunds", quantity, equipItemToAdjust.getName()));
-			return;
-		}
-
-		if (updatedItem != null)
-		{
-			// item is already in inventory; update it
-			final double prevQty = (updatedItem.qty() < 0) ? 0 : updatedItem.qty();
-			final double newQty = prevQty + quantity;
-
-			theCharacter.updateEquipmentQty(updatedItem, prevQty, newQty);
-			Float qty = (float) newQty;
-			updatedItem.setQty(qty);
-			purchasedEquip.setQuantity(equipment, qty.intValue());
-		}
-		else
-		{
-			// item is not in inventory; add it
-			updatedItem = equipItemToAdjust.clone();
-
-			if (updatedItem != null)
-			{
-				// Set the number carried and add it to the character
-				Float qty = (float) quantity;
-				updatedItem.setQty(qty);
-				theCharacter.addEquipment(updatedItem);
-			}
-			purchasedEquip.addElement(updatedItem, quantity);
-		}
-
-		// Update the PC and equipment
-		if (!free)
-		{
-			double itemCost = calcItemCost(updatedItem, quantity, (GearBuySellScheme) gearBuySellSchemeRef.get());
-			theCharacter.adjustGold(itemCost * -1);
-		}
-		theCharacter.setCalcEquipmentList();
-		theCharacter.setDirty(true);
-		updateWealthFields();
 	}
 
 	private boolean hasBeenAdjusted(Equipment equipItemToAdjust)
@@ -3147,245 +2426,6 @@ public class CharacterFacadeImpl
 		}
 		//TODO if this is returning null, then the SolverManager needs to destroy the unused channels :/
 		return result == CustomEquipResult.PURCHASE ? newEquip : null;
-	}
-
-	@Override
-	public void removePurchasedEquipment(EquipmentFacade equipment, int quantity, boolean free)
-	{
-		if (equipment == null || quantity <= 0)
-		{
-			return;
-		}
-
-		Equipment equipItemToAdjust = (Equipment) equipment;
-
-		Equipment updatedItem = theCharacter.getEquipmentNamed(equipItemToAdjust.getName());
-		double numRemoved = 0;
-
-		// see if item is already in inventory; update it
-		if (updatedItem != null)
-		{
-			final double prevQty = (updatedItem.qty() < 0) ? 0 : updatedItem.qty();
-			numRemoved = Math.min(quantity, prevQty);
-			final double newQty = Math.max(prevQty - numRemoved, 0);
-
-			if (newQty <= 0)
-			{
-				// completely remove item
-				updatedItem.setNumberCarried((float) 0);
-				updatedItem.setLocation(EquipmentLocation.NOT_CARRIED);
-
-				final Equipment eqParent = updatedItem.getParent();
-
-				if (eqParent != null)
-				{
-					eqParent.removeChild(theCharacter, updatedItem);
-				}
-
-				theCharacter.removeEquipment(updatedItem);
-				purchasedEquip.removeElement(updatedItem);
-			}
-			else
-			{
-				// update item count
-				theCharacter.updateEquipmentQty(updatedItem, prevQty, newQty);
-				Float qty = (float) newQty;
-				updatedItem.setQty(qty);
-				updatedItem.setNumberCarried(qty);
-				purchasedEquip.setQuantity(equipment, qty.intValue());
-			}
-
-			theCharacter.updateEquipmentQty(updatedItem, prevQty, newQty);
-			Float qty = (float) newQty;
-			updatedItem.setQty(qty);
-			updatedItem.setNumberCarried(qty);
-		}
-
-		// Update the PC and equipment
-		if (!free)
-		{
-			double itemCost =
-					calcItemCost(updatedItem, numRemoved * -1, (GearBuySellScheme) gearBuySellSchemeRef.get());
-			theCharacter.adjustGold(itemCost * -1);
-		}
-		theCharacter.setCalcEquipmentList();
-		theCharacter.setDirty(true);
-		updateWealthFields();
-	}
-
-	@Override
-	public void deleteCustomEquipment(EquipmentFacade eqFacade)
-	{
-		if (eqFacade == null || !(eqFacade instanceof Equipment))
-		{
-			return;
-		}
-
-		Equipment itemToBeDeleted = (Equipment) eqFacade;
-
-		if (!itemToBeDeleted.isType(Constants.TYPE_CUSTOM))
-		{
-			return;
-		}
-
-		if (!delegate.showWarningConfirm(LanguageBundle.getString("in_igDeleteCustomWarnTitle"), //$NON-NLS-1$
-			LanguageBundle.getFormattedString("in_igDeleteCustomWarning", //$NON-NLS-1$
-				itemToBeDeleted)))
-		{
-			return;
-		}
-
-		removePurchasedEquipment(itemToBeDeleted, Integer.MAX_VALUE, false);
-		Globals.getContext().getReferenceContext().forget(itemToBeDeleted);
-
-		if (dataSet.getEquipment() instanceof DefaultListFacade<?>)
-		{
-			((DefaultListFacade<EquipmentFacade>) dataSet.getEquipment()).removeElement(itemToBeDeleted);
-		}
-
-	}
-
-	@Override
-	public boolean isQualifiedFor(EquipmentFacade equipment)
-	{
-		final Equipment equip = (Equipment) equipment;
-		final boolean accept = PrereqHandler.passesAll(equip, theCharacter, equip);
-
-		if (accept && (equip.isShield() || equip.isWeapon() || equip.isArmor()))
-		{
-			return theCharacter.isProficientWith(equip);
-		}
-
-		return accept;
-	}
-
-	@Override
-	public EquipmentFacade getEquipmentSizedForCharacter(EquipmentFacade equipment)
-	{
-		final Equipment equip = (Equipment) equipment;
-		final SizeAdjustment newSize = theCharacter.getSizeAdjustment();
-		if (equip.getSizeAdjustment() == newSize || !Globals.canResizeHaveEffect(equip, null))
-		{
-			return equipment;
-		}
-
-		final String existingKey = equip.getKeyName();
-		final String newKey = equip.createKeyForAutoResize(newSize);
-
-		Equipment potential =
-				Globals.getContext().getReferenceContext().silentlyGetConstructedCDOMObject(Equipment.class, newKey);
-
-		if (newKey.equals(existingKey))
-		{
-			return equipment;
-		}
-
-		// If we've already resized this piece of equipment to this size
-		// on a previous occasion, just substitute that piece of equipment
-		// in place of the selected equipment.
-		if (potential != null)
-		{
-			return potential;
-		}
-
-		final String newName = equip.createNameForAutoResize(newSize);
-		potential =
-				Globals.getContext().getReferenceContext().silentlyGetConstructedCDOMObject(Equipment.class, newName);
-
-		if (potential != null)
-		{
-			return potential;
-		}
-
-		final Equipment newEq = equip.clone();
-
-		if (!newEq.containsKey(ObjectKey.BASE_ITEM))
-		{
-			newEq.put(ObjectKey.BASE_ITEM, CDOMDirectSingleRef.getRef(equip));
-		}
-
-		newEq.setName(newName);
-		newEq.put(StringKey.OUTPUT_NAME, newName);
-		newEq.put(StringKey.KEY_NAME, newKey);
-		newEq.resizeItem(theCharacter, newSize);
-		newEq.removeType(Type.AUTO_GEN);
-		newEq.removeType(Type.STANDARD);
-		if (!newEq.isType(Constants.TYPE_CUSTOM))
-		{
-			newEq.addType(Type.CUSTOM);
-		}
-
-		Globals.getContext().getReferenceContext().importObject(newEq);
-
-		return newEq;
-	}
-
-	/**
-	 * Whether we should automatically resize all purchased gear to match the 
-	 * character's size.
-	 * @return true if equipment should be auto resize.
-	 */
-	@Override
-	public boolean isAutoResize()
-	{
-		return theCharacter.isAutoResize();
-	}
-
-	/**
-	 * Update whether we should automatically resize all purchased gear to match  
-	 * the character's size.
-	 * 
-	 * @param autoResize The new value for auto resize equipment option.
-	 */
-	@Override
-	public void setAutoResize(boolean autoResize)
-	{
-		theCharacter.setAutoResize(autoResize);
-	}
-
-	@Override
-	public EquipmentSetFacade createEquipmentSet(String setName)
-	{
-		String id = EquipmentSetFacadeImpl.getNewIdPath(charDisplay, null);
-		EquipSet eSet = new EquipSet(id, setName);
-		theCharacter.addEquipSet(eSet);
-		final EquipmentSetFacadeImpl facade =
-				new EquipmentSetFacadeImpl(delegate, theCharacter, eSet, dataSet, purchasedEquip, todoManager, this);
-		equipmentSets.addElement(facade);
-
-		return facade;
-	}
-
-	@Override
-	public void deleteEquipmentSet(EquipmentSetFacade set)
-	{
-		if (set == null || !(set instanceof EquipmentSetFacadeImpl))
-		{
-			return;
-		}
-		EquipmentSetFacadeImpl setImpl = (EquipmentSetFacadeImpl) set;
-		EquipSet eSet = setImpl.getEquipSet();
-
-		theCharacter.delEquipSet(eSet);
-		equipmentSets.removeElement(set);
-	}
-
-	@Override
-	public ReferenceFacade<String> getCarriedWeightRef()
-	{
-		return carriedWeightRef;
-	}
-
-	@Override
-	public ReferenceFacade<String> getLoadRef()
-	{
-		return loadRef;
-	}
-
-	@Override
-	public ReferenceFacade<String> getWeightLimitRef()
-	{
-		return weightLimitRef;
 	}
 
 	@Override
@@ -3515,45 +2555,6 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public boolean isQualifiedFor(TempBonusFacade tempBonusFacade)
-	{
-		if (!(tempBonusFacade instanceof TempBonusFacadeImpl))
-		{
-			return false;
-		}
-
-		TempBonusFacadeImpl tempBonus = (TempBonusFacadeImpl) tempBonusFacade;
-		CDOMObject originObj = tempBonus.getOriginObj();
-		if (!theCharacter.isQualified(originObj))
-		{
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean isQualifiedFor(SpellFacade spellFacade, PCClass pcClass)
-	{
-		if (!(spellFacade instanceof SpellFacadeImplem) || (pcClass == null))
-		{
-			return false;
-		}
-
-		SpellFacadeImplem spellFI = (SpellFacadeImplem) spellFacade;
-
-		if (!theCharacter.isQualified(spellFI.getSpell()))
-		{
-			return false;
-		}
-		if (!spellFI.getCharSpell().isSpecialtySpell(theCharacter)
-			&& SpellCountCalc.isProhibited(spellFI.getSpell(), pcClass, theCharacter))
-		{
-			return false;
-		}
-		return true;
-	}
-
-	@Override
 	public boolean isQualifiedFor(EquipmentFacade equipFacade, EquipmentModifier eqMod)
 	{
 		if (!(equipFacade instanceof Equipment))
@@ -3661,29 +2662,10 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public ReferenceFacade<File> getPortraitRef()
-	{
-		return portrait;
-	}
-
-	@Override
 	public void setPortrait(File file)
 	{
 		portrait.set(file);
 		theCharacter.setPortraitPath(file == null ? null : file.getAbsolutePath());
-	}
-
-	@Override
-	public ReferenceFacade<Rectangle> getThumbnailCropRef()
-	{
-		return cropRect;
-	}
-
-	@Override
-	public void setThumbnailCrop(Rectangle rect)
-	{
-		cropRect.set(rect);
-		theCharacter.setPortraitThumbnailRect(rect);
 	}
 
 	@Override
@@ -3868,27 +2850,6 @@ public class CharacterFacadeImpl
 	}
 
 	@Override
-	public List<Kit> getAvailableKits()
-	{
-		List<Kit> kits = new ArrayList<>();
-		for (Kit kit : dataSet.getKits())
-		{
-			if (kit == null)
-			{
-				continue;
-			}
-
-			if (kit.isVisible(theCharacter, View.VISIBLE_DISPLAY))
-			{
-				kits.add(kit);
-			}
-
-		}
-
-		return kits;
-	}
-
-	@Override
 	public VariableProcessor getVariableProcessor()
 	{
 		return theCharacter.getVariableProcessor();
@@ -3904,35 +2865,6 @@ public class CharacterFacadeImpl
 	public boolean matchesCharacter(PlayerCharacter pc)
 	{
 		return theCharacter != null && theCharacter.equals(pc);
-	}
-
-	@Override
-	public void modifyCharges(List<EquipmentFacade> targets)
-	{
-		List<Equipment> chargedEquip = new ArrayList<>();
-		for (EquipmentFacade equipmentFacade : targets)
-		{
-			if (equipmentFacade instanceof Equipment && ((Equipment) equipmentFacade).getMaxCharges() > 0)
-			{
-				chargedEquip.add((Equipment) equipmentFacade);
-			}
-		}
-
-		if (chargedEquip.isEmpty())
-		{
-			return;
-		}
-
-		for (Equipment equip : chargedEquip)
-		{
-			int selectedCharges = getSelectedCharges(equip);
-			if (selectedCharges < 0)
-			{
-				return;
-			}
-			equip.setRemainingCharges(selectedCharges);
-			purchasedEquip.modifyElement(equip);
-		}
 	}
 
 	private int getSelectedCharges(Equipment equip)
@@ -3967,35 +2899,6 @@ public class CharacterFacadeImpl
 		}
 
 		return charges;
-	}
-
-	@Override
-	public void addNote(List<EquipmentFacade> targets)
-	{
-		List<Equipment> notedEquip = new ArrayList<>();
-		for (EquipmentFacade equipmentFacade : targets)
-		{
-			if (equipmentFacade instanceof Equipment)
-			{
-				notedEquip.add((Equipment) equipmentFacade);
-			}
-		}
-
-		if (notedEquip.isEmpty())
-		{
-			return;
-		}
-
-		for (Equipment equip : notedEquip)
-		{
-			Optional<String> note = getNote(equip);
-			if (note.isEmpty())
-			{
-				return;
-			}
-			equip.setNote(note.get());
-			purchasedEquip.modifyElement(equip);
-		}
 	}
 
 	private Optional<String> getNote(Equipment equip)
@@ -4124,38 +3027,6 @@ public class CharacterFacadeImpl
 	public CharID getCharID()
 	{
 		return theCharacter.getCharID();
-	}
-
-	@Override
-	public boolean isQualifiedFor(PCTemplate template)
-	{
-		if (template == null)
-		{
-			return false;
-		}
-		return PrereqHandler.passesAll(template, theCharacter, template)
-			&& theCharacter.isQualified(template);
-	}
-
-	@Override
-	public boolean isQualifiedFor(Race qRace)
-	{
-		return theCharacter.isQualified(qRace);
-	}
-
-	@Override
-	public boolean isQualifiedFor(Kit kit)
-	{
-		BigDecimal totalCost = kit.getTotalCostToBeCharged(theCharacter);
-		if (totalCost != null)
-		{
-			if (theCharacter.getGold().compareTo(totalCost) < 0)
-			{
-				// Character cannot afford the kit
-				return false;
-			}
-		}
-		return true;
 	}
 
 	@Override
