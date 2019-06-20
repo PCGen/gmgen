@@ -81,7 +81,6 @@ public final class Main
 	private static boolean startNameGen;
 	private static String settingsDir;
 	private static String campaignMode;
-	private static String characterSheet;
 	private static String exportSheet;
 	private static String partyFile;
 	private static String characterFile;
@@ -89,11 +88,6 @@ public final class Main
 
 	private Main()
 	{
-	}
-
-	public static boolean shouldStartInCharacterSheet()
-	{
-		return characterSheet != null;
 	}
 
 	public static String getStartupCampaign()
@@ -204,13 +198,10 @@ public final class Main
 		}
 
 		settingsDir = args.getString("settingsdir");
-		campaignMode = args.getString("campaignmode");
-		characterSheet = args.get("D");
 		exportSheet = args.get("E");
 		partyFile = args.get("p");
 		characterFile = args.get("c");
 		outputFile = args.get("o");
-		startNameGen = args.get("name_generator");
 
 		return args;
 	}
@@ -436,13 +427,6 @@ public final class Main
 
 		parser.addArgument("-o", "--outputfile").nargs(1)
 			.type(Arguments.fileType().verifyCanCreate().verifyCanWrite().verifyNotExists());
-
-		parser.addArgument("-c", "--character").nargs(1)
-			.type(Arguments.fileType().verifyCanRead().verifyExists().verifyIsFile());
-
-		parser.addArgument("-p", "--party").nargs(1)
-			.type(Arguments.fileType().verifyCanRead().verifyExists().verifyIsFile());
-
 		return parser;
 	}
 
