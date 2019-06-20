@@ -82,7 +82,6 @@ import pcgen.facade.util.event.ReferenceEvent;
 import pcgen.facade.util.event.ReferenceListener;
 import pcgen.gui2.UIPropertyContext;
 import pcgen.gui2.dialog.CharacterHPDialog;
-import pcgen.gui2.dialog.KitSelectionDialog;
 import pcgen.gui2.dialog.RandomNameDialog;
 import pcgen.gui2.dialog.SinglePrefDialog;
 import pcgen.gui2.prefs.CharacterStatsPanel;
@@ -148,7 +147,6 @@ public class SummaryInfoTab extends JPanel implements CharacterInfoTab, TodoHand
 	private final ClassBoxRenderer classBoxRenderer;
 	private final JButton generateRollsButton;
 	private final JButton rollMethodButton;
-	private final JButton createMonsterButton;
 	private final JButton expaddButton;
 	private final JButton expsubtractButton;
 	private final JButton addLevelsButton;
@@ -197,7 +195,6 @@ public class SummaryInfoTab extends JPanel implements CharacterInfoTab, TodoHand
 		this.ageField = new JFormattedTextField(NumberFormat.getIntegerInstance());
 		this.generateRollsButton = new JButton();
 		this.rollMethodButton = new JButton();
-		this.createMonsterButton = new JButton();
 		this.addLevelsButton = new JButton();
 		this.removeLevelsButton = new JButton();
 		this.expaddButton = new JButton();
@@ -397,8 +394,6 @@ public class SummaryInfoTab extends JPanel implements CharacterInfoTab, TodoHand
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		gbc.insets = new Insets(1, 1, 1, racePanelInsets.right);
 		rightPanel.add(ageComboBox, gbc);
-		gbc.insets = new Insets(1, racePanelInsets.left, racePanelInsets.bottom, racePanelInsets.right);
-		rightPanel.add(createMonsterButton, gbc);
 		/*
 		 * classPanel
 		 */
@@ -653,8 +648,6 @@ public class SummaryInfoTab extends JPanel implements CharacterInfoTab, TodoHand
 		models.put(GenerateRollsAction.class, new GenerateRollsAction(character));
 		models.put(RollMethodAction.class,
 			new RollMethodAction(character, (JFrame) SwingUtilities.getWindowAncestor(this)));
-		models.put(CreateMonsterAction.class,
-			new CreateMonsterAction(character, (JFrame) SwingUtilities.getWindowAncestor(this)));
 		models.put(AddLevelsAction.class, new AddLevelsAction(character));
 		models.put(RemoveLevelsAction.class, new RemoveLevelsAction(character));
 		models.put(StatTableModel.class, new StatTableModel(character, statsTable));
@@ -710,7 +703,6 @@ public class SummaryInfoTab extends JPanel implements CharacterInfoTab, TodoHand
 		random.setAction(models.get(RandomNameAction.class));
 		generateRollsButton.setAction(models.get(GenerateRollsAction.class));
 		rollMethodButton.setAction(models.get(RollMethodAction.class));
-		createMonsterButton.setAction(models.get(CreateMonsterAction.class));
 		AddLevelsAction addLevelsAction = models.get(AddLevelsAction.class);
 		addLevelsButton.setAction(addLevelsAction);
 		addLevelsField.setAction(addLevelsAction);
@@ -1329,30 +1321,6 @@ public class SummaryInfoTab extends JPanel implements CharacterInfoTab, TodoHand
 			prefsDialog.setLocationRelativeTo(parent);
 			prefsDialog.setVisible(true);
 			character.refreshRollMethod();
-		}
-
-	}
-
-	private class CreateMonsterAction extends AbstractAction
-	{
-
-		private final CharacterFacade character;
-		private final JFrame frame;
-
-		CreateMonsterAction(CharacterFacade character, JFrame frame)
-		{
-			putValue(NAME, LanguageBundle.getString("in_sumCreateMonster")); //$NON-NLS-1$
-			putValue(SHORT_DESCRIPTION, LanguageBundle.getString("in_sumCreateMonster_Tip")); //$NON-NLS-1$
-			this.character = character;
-			this.frame = frame;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			KitSelectionDialog kitDialog = new KitSelectionDialog(frame, character);
-			kitDialog.setLocationRelativeTo(frame);
-			kitDialog.setVisible(true);
 		}
 
 	}
