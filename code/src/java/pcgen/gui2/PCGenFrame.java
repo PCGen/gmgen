@@ -82,7 +82,6 @@ import pcgen.gui2.dialog.PostLevelUpDialog;
 import pcgen.gui2.dialog.RadioChooserDialog;
 import pcgen.gui2.dialog.SpellChoiceDialog;
 import pcgen.gui2.sources.SourceSelectionDialog;
-import pcgen.gui2.tabs.InfoTabbedPane;
 import pcgen.gui2.tools.CharacterSelectionListener;
 import pcgen.gui2.tools.Icons;
 import pcgen.gui2.util.ShowMessageGuiObserver;
@@ -137,10 +136,10 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	private final DefaultReferenceFacade<CharacterFacade> currentCharacterRef;
 	private final DefaultReferenceFacade<DataSetFacade> currentDataSetRef;
 	private final FilenameListener filenameListener;
-	private JDialog sourceSelectionDialog = null;
-	private SourceLoadWorker sourceLoader = null;
-	private String section15 = null;
-	private String lastCharacterPath = null;
+	private JDialog sourceSelectionDialog;
+	private SourceLoadWorker sourceLoader;
+	private String section15;
+	private String lastCharacterPath;
 	/**
 	 * This is a bit of a hack until we're full on JavaFX for showing dialogs
 	 */
@@ -355,12 +354,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 			{
 				//TODO: complain about it
 				return false;
-			}
-			if (Main.shouldStartInCharacterSheet())
-			{
-				String key = UIPropertyContext.C_PROP_INITIAL_TAB;
-				key = UIPropertyContext.createFilePropertyKey(file, key);
-				UIPropertyContext.getInstance().setInt(key, InfoTabbedPane.CHARACTER_SHEET_TAB);
 			}
 			GuiAssertions.assertIsNotSwingThread();
 			SwingUtilities.invokeAndWait(() -> {
