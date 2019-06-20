@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -67,15 +66,6 @@ public final class InfoTabbedPane extends JTabbedPane implements CharacterSelect
 {
 
 	public static final int SUMMARY_TAB = 0;
-	public static final int RACE_TAB = 1;
-	public static final int TEMPLATE_TAB = 2;
-	public static final int CLASS_TAB = 3;
-	public static final int SKILL_TAB = 4;
-	public static final int ABILITIES_TAB = 5;
-	public static final int DOMAIN_TAB = 6;
-	public static final int SPELLS_TAB = 7;
-	public static final int INVENTORY_TAB = 8;
-	public static final int DESCRIPTION_TAB = 9;
 	public static final int CHARACTER_SHEET_TAB = 10;
 	private final DoubleKeyMap<CharacterFacade, CharacterInfoTab, ModelMap> stateMap;
 	private final Map<CharacterFacade, Integer> tabSelectionMap;
@@ -109,22 +99,7 @@ public final class InfoTabbedPane extends JTabbedPane implements CharacterSelect
 
 	private void initComponent()
 	{
-		setTabPlacement(SwingConstants.TOP);
 
-		addTab(new RaceInfoTab());
-		addTab(new TemplateInfoTab());
-		addTab(new ClassInfoTab());
-		addTab(new SkillInfoTab());
-		addTab(new AbilitiesInfoTab());
-		domainTabLocation = getTabCount();
-		addTab(domainInfoTab);
-		addTab(new SpellsInfoTab());
-		addTab(new InventoryInfoTab());
-		addTab(new DescriptionInfoTab());
-		addTab(new TempBonusInfoTab());
-		addTab(new CompanionInfoTab());
-		addTab(new CharacterSheetInfoTab());
-		addChangeListener(this);
 	}
 
 	private <T extends Component & CharacterInfoTab> void addTab(T tab)
