@@ -58,13 +58,13 @@ public final class PCGenActionMap extends ActionMap
 
 	//the File menu commands
 	private static final String FILE_COMMAND = "file";
-	static final String NEW_COMMAND = FILE_COMMAND + ".new";
+	private static final String NEW_COMMAND = FILE_COMMAND + ".new";
 	private static final String OPEN_COMMAND = FILE_COMMAND + ".open";
 	private static final String OPEN_RECENT_COMMAND = FILE_COMMAND + ".openrecent";
-	static final String CLOSE_COMMAND = FILE_COMMAND + ".close";
+	private static final String CLOSE_COMMAND = FILE_COMMAND + ".close";
 	private static final String CLOSEALL_COMMAND = FILE_COMMAND + ".closeall";
-	static final String SAVE_COMMAND = FILE_COMMAND + ".save";
-	static final String SAVEAS_COMMAND = FILE_COMMAND + ".saveas";
+	private static final String SAVE_COMMAND = FILE_COMMAND + ".save";
+	private static final String SAVEAS_COMMAND = FILE_COMMAND + ".saveas";
 	private static final String SAVEALL_COMMAND = FILE_COMMAND + ".saveall";
 	private static final String REVERT_COMMAND = FILE_COMMAND + ".reverttosaved";
 	private static final String PARTY_COMMAND = FILE_COMMAND + ".party";
@@ -81,14 +81,11 @@ public final class PCGenActionMap extends ActionMap
 	private static final String EQUIPMENTSET_COMMAND = EDIT_COMMAND + ".equipmentset";
 	//the Source menu commands
 	private static final String SOURCES_COMMAND = "sources";
-	private static final String SOURCES_LOAD_COMMAND = SOURCES_COMMAND + ".load";
-	private static final String SOURCES_LOAD_SELECT_COMMAND = SOURCES_COMMAND + ".select";
 	private static final String SOURCES_RELOAD_COMMAND = SOURCES_COMMAND + ".reload";
 	private static final String SOURCES_UNLOAD_COMMAND = SOURCES_COMMAND + ".unload";
 	private static final String INSTALL_DATA_COMMAND = SOURCES_COMMAND + ".installData";
 	//the tools menu commands
 	private static final String TOOLS_COMMAND = "tools";
-	static final String GMGEN_COMMAND = TOOLS_COMMAND + ".gmgen";
 	static final String LOG_COMMAND = TOOLS_COMMAND + ".log";
 	private static final String LOGGING_LEVEL_COMMAND = TOOLS_COMMAND + ".loggingLevel";
 	private static final String CALCULATOR_COMMAND = TOOLS_COMMAND + ".calculator";
@@ -149,7 +146,6 @@ public final class PCGenActionMap extends ActionMap
 		put(COREVIEW_COMMAND, new CoreViewAction());
 		put(SOLVERVIEW_COMMAND, new SolverViewAction());
 		put(INSTALL_DATA_COMMAND, new InstallDataAction());
-		put(SOURCES_LOAD_SELECT_COMMAND, new LoadSourcesSelectAction());
 		put(SOURCES_RELOAD_COMMAND, new ReloadSourcesAction());
 		put(SOURCES_UNLOAD_COMMAND, new UnloadSourcesAction());
 
@@ -595,22 +591,6 @@ public final class PCGenActionMap extends ActionMap
 		public void actionPerformed(ActionEvent e)
 		{
 			PCGenUIManager.closePCGen();
-		}
-
-	}
-
-	private final class LoadSourcesSelectAction extends PCGenAction
-	{
-
-		private LoadSourcesSelectAction()
-		{
-			super("mnuSourcesLoadSelect", SOURCES_LOAD_COMMAND, "shortcut L");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.showSourceSelectionDialog();
 		}
 
 	}
