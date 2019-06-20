@@ -66,7 +66,6 @@ public final class InfoTabbedPane extends JTabbedPane implements CharacterSelect
 {
 
 	public static final int SUMMARY_TAB = 0;
-	public static final int CHARACTER_SHEET_TAB = 10;
 	private final DoubleKeyMap<CharacterFacade, CharacterInfoTab, ModelMap> stateMap;
 	private final Map<CharacterFacade, Integer> tabSelectionMap;
 	private final TabModelService modelService;

@@ -26,9 +26,9 @@ import pcgen.gui3.utilty.ColorUtilty;
 public abstract class CharacterTreeCellRenderer extends TreeColumnCellRenderer
 {
 
-	protected CharacterFacade character = null;
+	protected CharacterFacade character;
 
-	public CharacterTreeCellRenderer()
+	CharacterTreeCellRenderer()
 	{
 		setTextNonSelectionColor(ColorUtilty.colorToAWTColor(UIPropertyContext.getQualifiedColor()));
 	}
@@ -43,12 +43,12 @@ public abstract class CharacterTreeCellRenderer extends TreeColumnCellRenderer
 		return new Handler(character);
 	}
 
-	public class Handler
+	public final class Handler
 	{
 
 		private final CharacterFacade character;
 
-		public Handler(CharacterFacade character)
+		private Handler(CharacterFacade character)
 		{
 			this.character = character;
 		}
