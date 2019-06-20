@@ -59,50 +59,50 @@ public final class PCGenActionMap extends ActionMap
 {
 
 	//the File menu commands
-	static final String FILE_COMMAND = "file";
+	private static final String FILE_COMMAND = "file";
 	static final String NEW_COMMAND = FILE_COMMAND + ".new";
-	static final String OPEN_COMMAND = FILE_COMMAND + ".open";
+	private static final String OPEN_COMMAND = FILE_COMMAND + ".open";
 	private static final String OPEN_RECENT_COMMAND = FILE_COMMAND + ".openrecent";
 	static final String CLOSE_COMMAND = FILE_COMMAND + ".close";
-	static final String CLOSEALL_COMMAND = FILE_COMMAND + ".closeall";
+	private static final String CLOSEALL_COMMAND = FILE_COMMAND + ".closeall";
 	static final String SAVE_COMMAND = FILE_COMMAND + ".save";
 	static final String SAVEAS_COMMAND = FILE_COMMAND + ".saveas";
-	static final String SAVEALL_COMMAND = FILE_COMMAND + ".saveall";
-	static final String REVERT_COMMAND = FILE_COMMAND + ".reverttosaved";
-	static final String PARTY_COMMAND = FILE_COMMAND + ".party";
-	static final String OPEN_PARTY_COMMAND = PARTY_COMMAND + ".open";
+	private static final String SAVEALL_COMMAND = FILE_COMMAND + ".saveall";
+	private static final String REVERT_COMMAND = FILE_COMMAND + ".reverttosaved";
+	private static final String PARTY_COMMAND = FILE_COMMAND + ".party";
+	private static final String OPEN_PARTY_COMMAND = PARTY_COMMAND + ".open";
 	private static final String OPEN_RECENT_PARTY_COMMAND = PARTY_COMMAND + ".openrecent";
-	static final String CLOSE_PARTY_COMMAND = PARTY_COMMAND + ".close";
-	static final String SAVE_PARTY_COMMAND = PARTY_COMMAND + ".save";
-	static final String SAVEAS_PARTY_COMMAND = PARTY_COMMAND + ".saveas";
-	static final String PRINT_COMMAND = FILE_COMMAND + ".print";
-	static final String EXPORT_COMMAND = FILE_COMMAND + ".export";
-	static final String EXIT_COMMAND = FILE_COMMAND + ".exit";
+	private static final String CLOSE_PARTY_COMMAND = PARTY_COMMAND + ".close";
+	private static final String SAVE_PARTY_COMMAND = PARTY_COMMAND + ".save";
+	private static final String SAVEAS_PARTY_COMMAND = PARTY_COMMAND + ".saveas";
+	private static final String PRINT_COMMAND = FILE_COMMAND + ".print";
+	private static final String EXPORT_COMMAND = FILE_COMMAND + ".export";
+	private static final String EXIT_COMMAND = FILE_COMMAND + ".exit";
 	//the Edit menu commands
 	private static final String EDIT_COMMAND = "edit";
 	static final String ADD_KIT_COMMAND = EDIT_COMMAND + ".addkit";
-	static final String TEMP_BONUS_COMMAND = EDIT_COMMAND + ".tempbonus";
+	private static final String TEMP_BONUS_COMMAND = EDIT_COMMAND + ".tempbonus";
 	private static final String EQUIPMENTSET_COMMAND = EDIT_COMMAND + ".equipmentset";
 	//the Source menu commands
 	private static final String SOURCES_COMMAND = "sources";
-	static final String SOURCES_LOAD_COMMAND = SOURCES_COMMAND + ".load";
-	static final String SOURCES_LOAD_SELECT_COMMAND = SOURCES_COMMAND + ".select";
-	static final String SOURCES_RELOAD_COMMAND = SOURCES_COMMAND + ".reload";
-	static final String SOURCES_UNLOAD_COMMAND = SOURCES_COMMAND + ".unload";
-	static final String INSTALL_DATA_COMMAND = SOURCES_COMMAND + ".installData";
+	private static final String SOURCES_LOAD_COMMAND = SOURCES_COMMAND + ".load";
+	private static final String SOURCES_LOAD_SELECT_COMMAND = SOURCES_COMMAND + ".select";
+	private static final String SOURCES_RELOAD_COMMAND = SOURCES_COMMAND + ".reload";
+	private static final String SOURCES_UNLOAD_COMMAND = SOURCES_COMMAND + ".unload";
+	private static final String INSTALL_DATA_COMMAND = SOURCES_COMMAND + ".installData";
 	//the tools menu commands
 	private static final String TOOLS_COMMAND = "tools";
 	static final String GMGEN_COMMAND = TOOLS_COMMAND + ".gmgen";
 	static final String LOG_COMMAND = TOOLS_COMMAND + ".log";
-	static final String LOGGING_LEVEL_COMMAND = TOOLS_COMMAND + ".loggingLevel";
-	static final String CALCULATOR_COMMAND = TOOLS_COMMAND + ".calculator";
-	static final String COREVIEW_COMMAND = TOOLS_COMMAND + ".coreview";
-	static final String SOLVERVIEW_COMMAND = TOOLS_COMMAND + ".solverview";
+	private static final String LOGGING_LEVEL_COMMAND = TOOLS_COMMAND + ".loggingLevel";
+	private static final String CALCULATOR_COMMAND = TOOLS_COMMAND + ".calculator";
+	private static final String COREVIEW_COMMAND = TOOLS_COMMAND + ".coreview";
+	private static final String SOLVERVIEW_COMMAND = TOOLS_COMMAND + ".solverview";
 	//the help menu commands
 	private static final String HELP_COMMAND = "help";
-	static final String HELP_DOCS_COMMAND = HELP_COMMAND + ".docs";
-	static final String HELP_OGL_COMMAND = HELP_COMMAND + ".ogl";
-	static final String HELP_ABOUT_COMMAND = HELP_COMMAND + ".about";
+	private static final String HELP_DOCS_COMMAND = HELP_COMMAND + ".docs";
+	private static final String HELP_OGL_COMMAND = HELP_COMMAND + ".ogl";
+	private static final String HELP_ABOUT_COMMAND = HELP_COMMAND + ".about";
 	private final PCGenFrame frame;
 
 	public static final String MNU_TOOLS = "mnuTools"; //$NON-NLS-1$

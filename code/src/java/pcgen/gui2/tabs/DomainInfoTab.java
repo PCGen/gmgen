@@ -111,7 +111,6 @@ public class DomainInfoTab extends FlippingSplitPane implements CharacterInfoTab
 
 	public DomainInfoTab()
 	{
-		super();
 		this.deityTable = new FilteredTreeViewTable<>();
 		this.domainTable = new JDynamicTable();
 		this.domainRowHeaderTable = TableUtils.createDefaultTable();
