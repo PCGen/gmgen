@@ -18,7 +18,6 @@
  */
 package pcgen.facade.core;
 
-import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.math.BigDecimal;
@@ -28,8 +27,6 @@ import pcgen.cdom.enumeration.BiographyField;
 import pcgen.cdom.enumeration.CharID;
 import pcgen.cdom.enumeration.Gender;
 import pcgen.cdom.enumeration.Handed;
-import pcgen.cdom.enumeration.Nature;
-import pcgen.cdom.enumeration.SkillFilter;
 import pcgen.cdom.meta.CorePerspective;
 import pcgen.core.AbilityCategory;
 import pcgen.core.Deity;
@@ -46,7 +43,6 @@ import pcgen.core.VariableProcessor;
 import pcgen.facade.util.DefaultListFacade;
 import pcgen.facade.util.ListFacade;
 import pcgen.facade.util.ReferenceFacade;
-import pcgen.facade.util.event.ChangeListener;
 import pcgen.io.ExportException;
 import pcgen.io.ExportHandler;
 
@@ -88,50 +84,6 @@ public interface CharacterFacade extends CompanionFacade
 	 */
 	public ReferenceFacade<Number> getScoreBaseRef(PCStat stat);
 
-	/**
-	 * @param stat The stat to retrieve the mod total for
-	 * @return The modifier for the stat total
-	 */
-	public int getModTotal(PCStat stat);
-
-	/**
-	 * @param stat The stat to retrieve the base score of
-	 * @return The base (user set) score for the stat
-	 */
-	public int getScoreBase(PCStat stat);
-
-	/**
-	 * Update the base score of the stat.
-	 * @param stat The stat to be set.
-	 * @param score The new base score.
-	 */
-	public void setScoreBase(PCStat stat, int score);
-
-	/**
-	 * Retrieve the display string for the score total. This may be a 
-	 * non-number if the stat is a non-ability (e.g. ghost constitution)
-	 * or if the game mode has named stat values (see the STATROLLTEXT 
-	 * game mode token).
-	 *  
-	 * @param stat The stat to be retrieved
-	 * @return The display string for the score total
-	 */
-	public String getScoreTotalString(PCStat stat);
-
-	/**
-	 * @param stat The stat to retrieve the racial bonus of.
-	 * @return The racial bonus to the stat score.
-	 */
-	public int getScoreRaceBonus(PCStat stat);
-
-	/**
-	 * Retrieve the bonus to the stat score from sources other than the 
-	 * character's race. e.g. templates, abilities. Also called the misc bonus.
-	 * @param stat The stat to retrieve the other bonus of.
-	 * @return The misc bonus to the stat score
-	 */
-	public int getScoreOtherBonus(PCStat stat);
-
 	public void addAbility(AbilityCategory category, AbilityFacade ability);
 
 	public void removeAbility(AbilityCategory category, AbilityFacade ability);
@@ -146,36 +98,13 @@ public interface CharacterFacade extends CompanionFacade
 	public ListFacade<AbilityFacade> getAbilities(AbilityCategory category);
 
 	/**
-	 * Retrieve a list of the ability categories that are currently relevant to 
-	 * the character. That is those ability categories that the character has 
-	 * abilities or unspent pool points in. The list will be updated as 
-	 * categories become active or inactive.
-	 * @return The list of active categories.
-	 */
-	public ListFacade<AbilityCategory> getActiveAbilityCategories();
-
-	public void addCharacterLevels(PCClass[] classes);
-
-	public void removeCharacterLevels(int levels);
-
-	/**
 	 * This returns the number of times that a given class has been taken by this character.
 	 * @param c a ClassFacade
 	 * @return the total level of a class
 	 */
 	public int getClassLevel(PCClass c);
 
-	public int getTotalSelections(AbilityCategory category);
-
 	public int getRemainingSelections(AbilityCategory category);
-
-	public void setRemainingSelection(AbilityCategory category, int remaining);
-
-	/**
-	 * Adjust the cash held by the character.
-	 * @param modVal The amount to add to the character's funds.
-	 */
-	public void adjustFunds(BigDecimal modVal);
 
 	/**
 	 * Set the cash held by the character.
@@ -184,105 +113,17 @@ public interface CharacterFacade extends CompanionFacade
 	public void setFunds(BigDecimal newVal);
 
 	/**
-	 * @return A reference to the amount of gold the character owns.
-	 */
-	public ReferenceFacade<BigDecimal> getFundsRef();
-
-	/**
-	 * @return A reference to the total wealth of the character.
-	 */
-	public ReferenceFacade<BigDecimal> getWealthRef();
-
-	/**
-	 * @return A reference to the chosen buy sell rate scheme for the character.
-	 */
-	public ReferenceFacade<GearBuySellFacade> getGearBuySellRef();
-
-	/**
-	 * Set a new buy sell rate scheme for the character.
-	 * @param scheme The new buy sell rate scheme.
-	 */
-	public void setGearBuySellRef(GearBuySellFacade scheme);
-
-	/**
 	 * @param allowed Is the character allowed to spend more funds than they have.
 	 */
 	public void setAllowDebt(boolean allowed);
 
-	/**
-	 * @return True if the character is allowed to spend more funds than they have.
-	 */
-	public boolean isAllowDebt();
-
-	public ListFacade<EquipmentSetFacade> getEquipmentSets();
-
-	public ReferenceFacade<EquipmentSetFacade> getEquipmentSetRef();
-
-	public void setEquipmentSet(EquipmentSetFacade set);
-
-	public EquipmentListFacade getPurchasedEquipment();
-
-	public void addPurchasedEquipment(EquipmentFacade equipment, int quantity, boolean customize, boolean free);
-
-	public void removePurchasedEquipment(EquipmentFacade equipment, int quantity, boolean free);
-
-	//public int getQuantity(EquipmentFacade equipment);
-	public boolean isQualifiedFor(EquipmentFacade equipment);
-
-	/**
-	 * Create an equipment item sized for the character. Will return an existing 
-	 * item if a suitable one already exists, including the passed in item if it 
-	 * is already the correct size ir if the item is not the type of item that 
-	 * can be resized.
-	 * 
-	 * @param equipment The equipment item to be resized.
-	 * @return The item at the correct size.
-	 */
-	public EquipmentFacade getEquipmentSizedForCharacter(EquipmentFacade equipment);
-
-	/**
-	 * Whether we should automatically resize all purchased gear to match the 
-	 * character's size.
-	 * @return true if equipment should be auto resize.
-	 */
-	public boolean isAutoResize();
-
-	/**
-	 * Update whether we should automatically resize all purchased gear to match  
-	 * the character's size.
-	 * 
-	 * @param autoResize The new value for auto resize equipment option.
-	 */
-	public void setAutoResize(boolean autoResize);
-
-	public EquipmentSetFacade createEquipmentSet(String name);
-
-	public void deleteEquipmentSet(EquipmentSetFacade set);
-
-	public boolean isQualifiedFor(PCClass c);
-
 	public boolean isAutomatic(Language language);
-
-	/**
-	 * Is the user allowed to remove this language currently? 
-	 * e.g Automatic languages may not be removed.  
-	 * @param language The language to be checked.
-	 * @return true if the language can be removed.
-	 */
-	public boolean isRemovable(Language language);
 
 	public void addTemplate(PCTemplate template);
 
 	public void removeTemplate(PCTemplate template);
 
 	public ListFacade<PCTemplate> getTemplates();
-
-	/**
-	 * Note: this returns both the bonuses that the character
-	 * has applied as well as the ones that haven't been applied.
-	 * @return a list of bonuses than the character can apply
-	 */
-	public ListFacade<TempBonusFacade> getAvailableTempBonuses();
 
 	/**
 	 * adds a temp bonus to the character
@@ -295,19 +136,6 @@ public interface CharacterFacade extends CompanionFacade
 	 * @param bonus the bonus to remove
 	 */
 	public void removeTempBonus(TempBonusFacade bonus);
-
-	/**
-	 * Enables or disables a temporary bonus to the character.
-	 * @param bonusFacade the bonus to change
-	 * @param active True: Make the bonus active, False: Make the bonus inactive 
-	 */
-	public void setTempBonusActive(TempBonusFacade bonusFacade, boolean active);
-
-	/**
-	 * 
-	 * @return a list of bonuses that have been added to the character
-	 */
-	public ListFacade<TempBonusFacade> getTempBonuses();
 
 	/**
 	 * This returns a DataSetFacade that contains all
@@ -334,11 +162,6 @@ public interface CharacterFacade extends CompanionFacade
 	 * @return a reference to this character's tab name
 	 */
 	public ReferenceFacade<String> getTabNameRef();
-
-	/**
-	 * @param name the text to displayed in the character's tab
-	 */
-	public void setTabName(String name);
 
 	/**
 	 * @return a reference to this character's name
@@ -420,14 +243,6 @@ public interface CharacterFacade extends CompanionFacade
 
 	public ListFacade<Language> getLanguages();
 
-	public ListFacade<LanguageChooserFacade> getLanguageChoosers();
-
-	/**
-	 * Remove a bonus language from the character.
-	 * @param lang The language to be removed
-	 */
-	public void removeLanguage(Language lang);
-
 	/**
 	 * Write the character details, as defined by the export handler to the writer.
 	 * 
@@ -461,70 +276,11 @@ public interface CharacterFacade extends CompanionFacade
 	public void setXP(final int xp);
 
 	/**
-	 * @return a reference to this character's current experience point value
-	 */
-	public ReferenceFacade<Integer> getXPRef();
-
-	/**
-	 * Adjust the character's current experience point value
-	 * @param xp The value to be added to the character's current experience point value
-	 */
-	public void adjustXP(final int xp);
-
-	/**
-	 * @return A reference to the XP total that will qualify the character for the next level
-	 */
-	public ReferenceFacade<Integer> getXPForNextLevelRef();
-
-	/**
-	 * Set the character's XP table.
-	 * *
-	 * @param xpTableName The name of the XP table to be set
-	 */
-	public void setXPTable(final String xpTableName);
-
-	/**
 	 * Set the character's character type.
 	 * *
 	 * @param characterType The character type to be set
 	 */
 	public void setCharacterType(String characterType);
-
-	/**
-	 * Set the character's associated preview sheet
-	 * *
-	 * @param previewSheet The preview sheet to be set
-	 */
-	public void setPreviewSheet(String previewSheet);
-
-	/**
-	 * Set the character's display filter for skills
-	 * *
-	 * @param filter The skill filter to be set
-	 */
-	public void setSkillFilter(SkillFilter filter);
-
-	/**
-	 * @return A reference to the name of the character's XP table
-	 */
-	public ReferenceFacade<String> getXPTableNameRef();
-
-	/**
-	 * @return A reference to the name of the character's type
-	 */
-	public ReferenceFacade<String> getCharacterTypeRef();
-
-	/**
-	 * @return A reference to the name of the character's 
-	 * associated preview sheet
-	 */
-	public ReferenceFacade<String> getPreviewSheetRef();
-
-	/**
-	 * @return A reference to the character's display filter 
-	 * for skills
-	 */
-	public ReferenceFacade<SkillFilter> getSkillFilterRef();
 
 	/**
 	 * Set the character's age in years.
@@ -555,71 +311,11 @@ public interface CharacterFacade extends CompanionFacade
 	public ReferenceFacade<String> getAgeCategoryRef();
 
 	/**
-	 * @return A reference to the label text for the character's stats total 
-	 */
-	public ReferenceFacade<String> getStatTotalLabelTextRef();
-
-	/**
-	 * @return A reference to the text for the character's stats total 
-	 */
-	public ReferenceFacade<String> getStatTotalTextRef();
-
-	/**
-	 * @return A reference to the label text for the character's modifier total
-	 */
-	public ReferenceFacade<String> getModTotalLabelTextRef();
-
-	/**
-	 * @return A reference to the text for the character's modifier total
-	 */
-	public ReferenceFacade<String> getModTotalTextRef();
-
-	/**
-	 * @return A list of things to be done for the character
-	 */
-	public ListFacade<TodoFacade> getTodoList();
-
-	/**
-	 * Roll a new set of ability scores for the character.
-	 */
-	public void rollStats();
-
-	/**
-	 * @return true If the current stat generation method supports randomly rolling stats. 
-	 */
-	public boolean isStatRollEnabled();
-
-	public ReferenceFacade<Integer> getTotalHPRef();
-
-	public ReferenceFacade<String> getCarriedWeightRef();
-
-	public ReferenceFacade<String> getLoadRef();
-
-	public ReferenceFacade<String> getWeightLimitRef();
-
-	/**
-	 * @return A reference to the stat roll method for the character 
-	 */
-	public ReferenceFacade<Integer> getRollMethodRef();
-
-	/**
-	 * Notify that the roll method may have changed. 
-	 */
-	public void refreshRollMethod();
-
-	/**
 	 * Check if the character meets all requirements to be of the object.
 	 * @param infoFacade The object to be checked.
 	 * @return True if the character qualifies for the object, false if not.
 	 */
 	public boolean isQualifiedFor(InfoFacade infoFacade);
-
-	/**
-	 * Check if the character meets all requirements to be of the race.
-	 * @param race The race to be checked.
-	 * @return True if the character qualifies for the race, false if not.
-	 */
-	public boolean isQualifiedFor(Race race);
 
 	/**
 	 * Check if the character meets all requirements to take the domain.
@@ -636,21 +332,6 @@ public interface CharacterFacade extends CompanionFacade
 	public boolean isQualifiedFor(Deity deity);
 
 	/**
-	 * Check if the character meets all requirements to take the temporary bonus.
-	 * @param tempBonusFacade The temporary bonus to be checked.
-	 * @return True if the character can take the bonus, false if not.
-	 */
-	public boolean isQualifiedFor(TempBonusFacade tempBonusFacade);
-
-	/**
-	 * Check if the character meets all requirements to know the spell.
-	 * @param spell The spell to be checked.
-	 * @param pcClass The class the spell would be added within.
-	 * @return True if the character can know the spell, false if not.
-	 */
-	public boolean isQualifiedFor(SpellFacade spell, PCClass pcClass);
-
-	/**
 	 * Is the modifier able to be added to the item of equipment?
 	 * @param equipFacade The equipment item being modified.
 	 * @param eqMod The equipment modifier to be checked.
@@ -658,7 +339,6 @@ public interface CharacterFacade extends CompanionFacade
 	 */
 	public boolean isQualifiedFor(EquipmentFacade equipFacade, EquipmentModifier eqMod);
 
-	public Nature getAbilityNature(AbilityFacade ability);
 	//
 	//	/**
 	//	 * @param category the category of the ability
@@ -670,26 +350,10 @@ public interface CharacterFacade extends CompanionFacade
 	public SpellSupportFacade getSpellSupport();
 
 	/**
-	 * @return a reference to the character's full portrait image
-	 */
-	public ReferenceFacade<File> getPortraitRef();
-
-	/**
 	 * Sets the file containing the portrait image
 	 * @param file a File containing the portrait image
 	 */
 	public void setPortrait(File file);
-
-	/**
-	 * The thumbnail cropping rectangle is used to indicate the area
-	 * of the portrait image that is to be used for the character's thumbnail.
-	 * Note: the Rectangle returned from the reference is passed by value, not by
-	 * reference.
-	 * @return a reference to the cropping rectangle for the thumbnail
-	 */
-	public ReferenceFacade<Rectangle> getThumbnailCropRef();
-
-	public void setThumbnailCrop(Rectangle rect);
 
 	/**
 	 * Retrieve the current export state of the BiographyField.
@@ -758,20 +422,6 @@ public interface CharacterFacade extends CompanionFacade
 	public void setWeight(int weight);
 
 	/**
-	 * Register a listener to be advised of potential changes in the number of 
-	 * selections for an ability category. 
-	 * @param listener The class to be advised of a change.
-	 */
-	public void addAbilityCatSelectionListener(ChangeListener listener);
-
-	/**
-	 * Deregister a listener that should no longer be advised of potential changes
-	 * in the number of selections for an ability category. 
-	 * @param listener The class to no longer be advised of a change.
-	 */
-	public void removeAbilityCatSelectionListener(ChangeListener listener);
-
-	/**
 	 * @return true if the character has been changed and needs to be saved.
 	 */
 	public boolean isDirty();
@@ -787,11 +437,6 @@ public interface CharacterFacade extends CompanionFacade
 	 * @param object The kit to be added
 	 */
 	public void addKit(Kit object);
-
-	/**
-	 * @return The list of kits currently available to the character.
-	 */
-	public List<Kit> getAvailableKits();
 
 	/**
 	 * Record the default output sheet for this character.
@@ -842,31 +487,9 @@ public interface CharacterFacade extends CompanionFacade
 	 */
 	public boolean matchesCharacter(PlayerCharacter pc);
 
-	/**
-	 * Modify the number of charges of the items of equipment. 
-	 * @param targets The equipment to be updated.
-	 */
-	public void modifyCharges(List<EquipmentFacade> targets);
-
-	/**
-	 * Delete the custom equipment item, ignored if the equip is not custom.
-	 * @param equip The equipment item to be deleted.
-	 */
-	public void deleteCustomEquipment(EquipmentFacade equip);
-
-	/**
-	 * Modify the user-defined notes for the items of equipment. 
-	 * @param targets The equipment to be updated.
-	 */
-	public void addNote(List<EquipmentFacade> targets);
-
 	public List<CoreViewNodeFacade> getCoreViewTree(CorePerspective pers);
 
 	CharID getCharID();
-
-	public boolean isQualifiedFor(PCTemplate element);
-
-	public boolean isQualifiedFor(Kit element);
 
 	/**
 	 * Return true if the feature with the given name is enabled for this PC; false
