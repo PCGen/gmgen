@@ -23,7 +23,6 @@ import pcgen.facade.core.CharacterFacade;
 import pcgen.facade.core.DataSetFacade;
 import pcgen.facade.util.ReferenceFacade;
 import pcgen.gui2.PCGenFrame;
-import pcgen.gui2.PCGenUIManager;
 import pcgen.gui2.dialog.ExportDialog;
 import pcgen.gui2.dialog.PrintPreviewDialog;
 import pcgen.gui2.tools.Icons;
@@ -99,12 +98,6 @@ public final class PCGenToolBar
 		toolBar.getItems().add(exportButton);
 		ref.addReferenceListener(new EnabledOnlyWithCharacter(exportButton, rootFrame));
 
-		Button preferencesButton = new Button();
-		preferencesButton.setOnAction(this::onPreferences);
-		preferencesButton.setGraphic(new ImageView(Icons.Preferences16.asJavaFX()));
-		preferencesButton.setText(LanguageBundle.getString("in_mnuToolsPreferences"));
-		toolBar.getItems().add(preferencesButton);
-
 		return toolBar;
 	}
 
@@ -138,8 +131,4 @@ public final class PCGenToolBar
 		SwingUtilities.invokeLater(() -> ExportDialog.showExportDialog(rootFrame));
 	}
 
-	private void onPreferences(final ActionEvent actionEvent)
-	{
-		SwingUtilities.invokeLater(PCGenUIManager::displayPreferencesDialog);
-	}
 }

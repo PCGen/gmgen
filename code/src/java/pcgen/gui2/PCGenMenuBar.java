@@ -130,11 +130,6 @@ public final class PCGenMenuBar extends JMenuBar implements CharacterSelectionLi
 	private JMenu createToolsMenu()
 	{
 		JMenu menu = new JMenu();
-		menu.setText(LanguageBundle.getString("in_mnuTools"));
-		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.PREFERENCES_COMMAND)));
-		menu.addSeparator();
-		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.GMGEN_COMMAND)));
-		menu.addSeparator();
 		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.LOG_COMMAND)));
 		menu.add(new LoggingLevelMenu());
 		menu.add(new JMenuItem(actionMap.get(PCGenActionMap.CALCULATOR_COMMAND)));
