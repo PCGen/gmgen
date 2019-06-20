@@ -23,8 +23,6 @@ import java.util.Optional;
 
 import pcgen.facade.core.CharacterFacade;
 import pcgen.facade.core.ChooserFacade;
-import pcgen.facade.core.EquipmentBuilderFacade;
-import pcgen.facade.core.SpellBuilderFacade;
 import pcgen.facade.core.UIDelegate;
 import pcgen.util.Logging;
 
@@ -87,18 +85,6 @@ public class ConsoleUIDelegate implements UIDelegate
 	public Optional<String> showInputDialog(String title, String message, String initialValue)
 	{
 		return Optional.empty();
-	}
-
-	@Override
-	public CustomEquipResult showCustomEquipDialog(CharacterFacade character, EquipmentBuilderFacade equipBuilder)
-	{
-		return CustomEquipResult.CANCELLED;
-	}
-
-	@Override
-	public boolean showCustomSpellDialog(SpellBuilderFacade spellBuilderFacade)
-	{
-		return false;
 	}
 
 }
