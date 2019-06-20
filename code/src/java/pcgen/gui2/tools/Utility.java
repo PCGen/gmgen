@@ -79,28 +79,6 @@ public final class Utility
 	}
 
 	/**
-	 * Set up GridBag Constraints.
-	 *
-	 * @param gbc    The gridbagconstraints to set up
-	 * @param gx     cols from left (left-most col for multi-column cell)
-	 * @param gy     rows from top (top-most row for multi-row cell)
-	 * @param gw     cols wide
-	 * @param gh     rows high
-	 * @param wx     weight of x, I typically put in percentile, only need to specify this once for each column,
-	 * 								other values in same column are 0.0
-	 * @param wy     weight of y, same as weight for cols, just specify a non-zero value for one cell in each row.
-	 * @param fill   How should the component be resized if smaller than the space.
-	 * @param anchor Where should the component be placed if smaller than the space.
-	 */
-	public static void buildConstraints(GridBagConstraints gbc, int gx, int gy, int gw, int gh, double wx, double wy,
-		int fill, int anchor)
-	{
-		buildConstraints(gbc, gx, gy, gw, gh, wx, wy);
-		gbc.fill = fill;
-		gbc.anchor = anchor;
-	}
-
-	/**
 	 * Set up GridBag Constraints in a relative pattern. Components must be
 	 * added in order row by row.
 	 *

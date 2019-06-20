@@ -66,10 +66,8 @@ import pcgen.facade.core.CharacterStubFacade;
 import pcgen.facade.core.ChooserFacade;
 import pcgen.facade.core.CompanionFacade;
 import pcgen.facade.core.DataSetFacade;
-import pcgen.facade.core.EquipmentBuilderFacade;
 import pcgen.facade.core.PartyFacade;
 import pcgen.facade.core.SourceSelectionFacade;
-import pcgen.facade.core.SpellBuilderFacade;
 import pcgen.facade.core.UIDelegate;
 import pcgen.facade.util.DefaultReferenceFacade;
 import pcgen.facade.util.ListFacade;
@@ -77,10 +75,8 @@ import pcgen.facade.util.ReferenceFacade;
 import pcgen.facade.util.event.ReferenceEvent;
 import pcgen.facade.util.event.ReferenceListener;
 import pcgen.gui2.dialog.ChooserDialog;
-import pcgen.gui2.dialog.EquipCustomizerDialog;
 import pcgen.gui2.dialog.PostLevelUpDialog;
 import pcgen.gui2.dialog.RadioChooserDialog;
-import pcgen.gui2.dialog.SpellChoiceDialog;
 import pcgen.gui2.sources.SourceSelectionDialog;
 import pcgen.gui2.tools.CharacterSelectionListener;
 import pcgen.gui2.tools.Icons;
@@ -1584,26 +1580,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	static void showAboutDialog()
 	{
 		new AboutDialog();
-	}
-
-	@Override
-	public CustomEquipResult showCustomEquipDialog(CharacterFacade character, EquipmentBuilderFacade equipBuilder)
-	{
-		EquipCustomizerDialog eqDialog = new EquipCustomizerDialog(this, character, equipBuilder);
-		eqDialog.setLocationRelativeTo(this);
-		eqDialog.setVisible(true);
-		CustomEquipResult result = eqDialog.isCancelled() ? CustomEquipResult.CANCELLED
-			: eqDialog.isPurchase() ? CustomEquipResult.PURCHASE : CustomEquipResult.OK;
-		return result;
-	}
-
-	@Override
-	public boolean showCustomSpellDialog(SpellBuilderFacade spellBuilderFI)
-	{
-		SpellChoiceDialog spellDialog = new SpellChoiceDialog(this, spellBuilderFI);
-		spellDialog.setLocationRelativeTo(this);
-		spellDialog.setVisible(true);
-		return !spellDialog.isCancelled();
 	}
 
 	private static String readTextFromFile(String fileName)
