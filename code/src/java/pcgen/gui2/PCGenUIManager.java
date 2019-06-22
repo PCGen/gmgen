@@ -42,7 +42,7 @@ import javafx.application.Platform;
 public final class PCGenUIManager
 {
 
-	private static PCGenFrame pcgenFrame = null;
+	private static PCGenFrame pcgenFrame;
 
 	private PCGenUIManager()
 	{

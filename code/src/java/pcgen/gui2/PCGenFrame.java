@@ -32,9 +32,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -45,7 +45,6 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -90,7 +89,6 @@ import pcgen.system.CharacterManager;
 import pcgen.system.ConfigurationSettings;
 import pcgen.system.FacadeFactory;
 import pcgen.system.LanguageBundle;
-import pcgen.system.Main;
 import pcgen.system.PCGenPropBundle;
 import pcgen.system.PCGenSettings;
 import pcgen.system.PropertyContext;
@@ -117,16 +115,10 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	private final PCGenActionMap actionMap;
 	private final PCGenStatusBar statusBar;
 
-	/**
-	 * The context indicating what items are currently loaded/being processed in the UI
-	 */
-	private final UIContext uiContext;
-
 	private final DefaultReferenceFacade<SourceSelectionFacade> currentSourceSelection;
 	private final DefaultReferenceFacade<CharacterFacade> currentCharacterRef;
 	private final DefaultReferenceFacade<DataSetFacade> currentDataSetRef;
 	private final FilenameListener filenameListener;
-	private JDialog sourceSelectionDialog;
 	private SourceLoadWorker sourceLoader;
 	private String section15;
 	private String lastCharacterPath;
@@ -135,9 +127,8 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 */
 	private Window javaFXStage;
 
-	public PCGenFrame(UIContext uiContext)
+	PCGenFrame(UIContext uiContext)
 	{
-		this.uiContext = Objects.requireNonNull(uiContext);
 		Globals.setRootFrame(this);
 		this.currentSourceSelection = uiContext.getCurrentSourceSelectionRef();
 		this.currentCharacterRef = new DefaultReferenceFacade<>();
@@ -210,13 +201,10 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		{
 			try
 			{
-				maybeLoadCampaign();
-				maybeLoadOrCreateCharacter();
 				PCGenUIManager.displayGmGen();
 				maybeAutoLoadSources();
-
 			}
-			catch (InterruptedException | InvocationTargetException ex)
+			catch (InterruptedException ex)
 			{
 				Logging.errorPrint("Unexepected exception", ex);
 			}
@@ -283,75 +271,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 			return false;
 		}
 
-		private boolean maybeLoadCampaign() throws InterruptedException
-		{
-			String camp = Main.getStartupCampaign();
-			if (camp != null)
-			{
-				SourceSelectionFacade selection = null;
-				ListFacade<SourceSelectionFacade> sources = FacadeFactory.getSourceSelections();
-				for (SourceSelectionFacade sourceSelectionFacade : sources)
-				{
-					if (sourceSelectionFacade.toString().equals(camp))
-					{
-						selection = sourceSelectionFacade;
-						break;
-					}
-				}
-				if (selection != null)
-				{
-					loadSourceSelection(selection);
-					sourceLoader.join();
-					return true;
-				}
-				else
-				{
-					//did not find source
-					Logging.errorPrint("Ignoring invalid campaign requested in -m flag: '" + camp + "'.");
-					return false;
-				}
-			}
-			return false;
-		}
-
-		/**
-		 * loads or creates a character based upon the command line arguments.
-		 * This also handles the start in character sheet command option
-		 * @return boolean
-		 * @throws InterruptedException
-		 * @throws InvocationTargetException
-		 */
-		private boolean maybeLoadOrCreateCharacter() throws InterruptedException, InvocationTargetException
-		{
-			if (Main.getStartupCharacterFile() == null)
-			{
-				return false;
-			}
-			final File file = new File(Main.getStartupCharacterFile());
-			final DataSetFacade dataset = currentDataSetRef.get();
-			if (!file.exists() && dataset == null)
-			{
-				//TODO: complain about it
-				return false;
-			}
-			GuiAssertions.assertIsNotSwingThread();
-			SwingUtilities.invokeAndWait(() -> {
-				if (!file.exists())
-				{
-					createNewCharacter(file);
-				}
-				else if (dataset == null)
-				{
-					loadCharacterFromFile(file);
-				}
-				else
-				{
-					openCharacter(file, dataset);
-				}
-			});
-			return true;
-		}
-
 	}
 
 	private static InputMap createInputMap(ActionMap actionMap)
@@ -407,17 +326,9 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	}
 
 	/**
-	 * @return the status bar for the main PCGen frame
-	 */
-	public PCGenStatusBar getStatusBar()
-	{
-		return statusBar;
-	}
-
-	/**
 	 * Unload any currently loaded sources. 
 	 */
-	public void unloadSources()
+	void unloadSources()
 	{
 		//make sure all characters are closed before unloading sources.
 		if (closeAllCharacters())
@@ -437,7 +348,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * @param sources a SourceSelectionFacade specifying the sources to load
 	 * @return true if the sources are loaded or are loading
 	 */
-	public boolean loadSourceSelection(SourceSelectionFacade sources)
+	boolean loadSourceSelection(SourceSelectionFacade sources)
 	{
 		if (sources == null)
 		{
@@ -461,7 +372,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		return false;
 	}
 
-	private boolean checkSourceEquality(SourceSelectionFacade source1, SourceSelectionFacade source2)
+	private static boolean checkSourceEquality(SourceSelectionFacade source1, SourceSelectionFacade source2)
 	{
 		if (source1 == source2)
 		{
@@ -492,7 +403,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		return true;
 	}
 
-	private boolean checkGameModeEquality(SourceSelectionFacade source1, SourceSelectionFacade source2)
+	private static boolean checkGameModeEquality(SourceSelectionFacade source1, SourceSelectionFacade source2)
 	{
 		if (source1 == source2)
 		{
@@ -510,7 +421,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		return true;
 	}
 
-	public boolean saveCharacter(CharacterFacade character)
+	boolean saveCharacter(CharacterFacade character)
 	{
 		if (!CharacterManager.characterFilenameValid(character))
 		{
@@ -560,7 +471,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 */
 	private void prepareForSave(CharacterFacade character, boolean savingAll)
 	{
-		List<CompanionFacade> tobeSaved = new ArrayList<>();
+		Collection<CompanionFacade> tobeSaved = new ArrayList<>();
 		for (CompanionFacade comp : character.getCompanionSupport().getCompanions())
 		{
 			if (StringUtils.isEmpty(comp.getFileRef().get().getName())
@@ -596,7 +507,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		}
 	}
 
-	public void closeCharacter(CharacterFacade character)
+	void closeCharacter(CharacterFacade character)
 	{
 		if (character.isDirty())
 		{
@@ -884,7 +795,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 
 	}
 
-	public void showOpenCharacterChooser()
+	void showOpenCharacterChooser()
 	{
 		GuiAssertions.assertIsNotJavaFXThread();
 		PropertyContext context = PCGenSettings.getInstance();
@@ -939,7 +850,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * then sets the character as the currently selected character
 	 * @param file the File for this character
 	 */
-	public void createNewCharacter(File file)
+	void createNewCharacter(File file)
 	{
 		GuiAssertions.assertIsSwingThread();
 		DataSetFacade data = getLoadedDataSetRef().get();
@@ -964,7 +875,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * from the file and a tab is opened for it.
 	 * @param pcgFile a file specifying the character to be loaded
 	 */
-	public void loadCharacterFromFile(final File pcgFile)
+	private void loadCharacterFromFile(final File pcgFile)
 	{
 		if (!PCGFile.isPCGenCharacterFile(pcgFile))
 		{
@@ -1145,7 +1056,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		}).start();
 	}
 
-	void loadPartyFromFile(final File pcpFile)
+	private void loadPartyFromFile(final File pcpFile)
 	{
 		if (!PCGFile.isPCGenPartyFile(pcpFile))
 		{
@@ -1257,7 +1168,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * @param checkbox The optional checkbox to be added - may be null.
 	 * @return JPanel A panel containing the message and the checkbox.
 	 */
-	public static JPanel buildMessageLabelPanel(String message, JCheckBox checkbox)
+	private static JPanel buildMessageLabelPanel(String message, JCheckBox checkbox)
 	{
 		JPanel panel = new JPanel();
 		JLabel label;

@@ -36,7 +36,6 @@ import pcgen.cdom.base.Constants;
 import pcgen.cdom.formula.PluginFunctionLibrary;
 import pcgen.core.CustomData;
 import pcgen.core.prereq.PrerequisiteTestFactory;
-import pcgen.facade.core.UIDelegate;
 import pcgen.gui2.PCGenUIManager;
 import pcgen.gui2.UIPropertyContext;
 import pcgen.gui3.JFXPanelFromResource;
@@ -74,26 +73,10 @@ public final class Main
 
 	private static PropertyContextFactory configFactory;
 
-	// TODO: move startup modes into an extensible class based system
 	private static String settingsDir;
-	private static String campaignMode;
-	private static String exportSheet;
-	private static String partyFile;
-	private static String characterFile;
-	private static String outputFile;
 
 	private Main()
 	{
-	}
-
-	public static String getStartupCampaign()
-	{
-		return campaignMode;
-	}
-
-	public static String getStartupCharacterFile()
-	{
-		return characterFile;
 	}
 
 	private static void logSystemProps()
@@ -130,15 +113,7 @@ public final class Main
 
 		parseCommands(args);
 
-		if (exportSheet == null)
-		{
-			startupWithGUI();
-		}
-		else
-		{
-			startupWithoutGUI();
-			shutdown();
-		}
+		startupWithGUI();
 	}
 
 	private static String getConfigPath()
@@ -159,18 +134,6 @@ public final class Main
 		return SystemUtils.USER_DIR;
 	}
 
-	public static boolean loadCharacterAndExport(String characterFile, String exportSheet, String outputFile,
-		String configFile)
-	{
-		Main.characterFile = characterFile;
-		Main.exportSheet = exportSheet;
-		Main.outputFile = outputFile;
-
-		configFactory = new PropertyContextFactory(SystemUtils.USER_DIR);
-		configFactory.registerAndLoadPropertyContext(ConfigurationSettings.getInstance(configFile));
-		return startupWithoutGUI();
-	}
-
 	/**
 	 * Initialize Main - must be called before any other getter can be used.
 	 *
@@ -187,10 +150,6 @@ public final class Main
 		}
 
 		settingsDir = args.getString("settingsdir");
-		exportSheet = args.get("E");
-		partyFile = args.get("p");
-		characterFile = args.get("c");
-		outputFile = args.get("o");
 
 		return args;
 	}
@@ -199,7 +158,7 @@ public final class Main
 	{
 		// configure the UI before any type of user prompting may take place
 		configureUI();
-		validateEnvironment(true);
+		validateEnvironment();
 		loadProperties(true);
 		initPrintPreviewFonts();
 
@@ -233,7 +192,7 @@ public final class Main
 	/**
 	 * Check that the runtime environment is suitable for PCGen to run.
 	 */
-	private static void validateEnvironment(boolean useGui)
+	private static void validateEnvironment()
 	{
 		// Check our main folders are present
 		String[] neededDirs = {ConfigurationSettings.getSystemsDir(), ConfigurationSettings.getPccFilesDir(),
@@ -262,11 +221,8 @@ public final class Main
 			String message;
 			message = "This installation of PCGen is missing the following required folders:\n" + missingDirs;
 			Logging.errorPrint(message);
-			if (useGui)
-			{
-				JOptionPane.showMessageDialog(null, message + "\nPlease reinstall PCGen.", Constants.APPLICATION_NAME,
-					JOptionPane.ERROR_MESSAGE);
-			}
+			JOptionPane.showMessageDialog(null, message + "\nPlease reinstall PCGen.", Constants.APPLICATION_NAME,
+				JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
 	}
@@ -325,35 +281,6 @@ public final class Main
 		return loader;
 	}
 
-	private static boolean startupWithoutGUI()
-	{
-		loadProperties(false);
-		validateEnvironment(false);
-
-		PCGenTaskExecutor executor = new PCGenTaskExecutor();
-		executor.addPCGenTask(createLoadPluginTask());
-		executor.addPCGenTask(new GameModeFileLoader());
-		executor.addPCGenTask(new CampaignFileLoader());
-		executor.run();
-
-		UIDelegate uiDelegate = new ConsoleUIDelegate();
-
-		BatchExporter exporter = new BatchExporter(exportSheet, uiDelegate);
-
-		boolean result = true;
-		if (partyFile != null)
-		{
-			result = exporter.exportParty(partyFile, outputFile);
-		}
-
-		if (characterFile != null)
-		{
-			result = exporter.exportCharacter(characterFile, outputFile);
-		}
-
-		return result;
-	}
-
 	public static void shutdown()
 	{
 		configFactory.savePropertyContexts();
@@ -406,9 +333,6 @@ public final class Main
 
 		parser.addArgument("-s", "--settingsdir").nargs(1)
 			.type(Arguments.fileType().verifyIsDirectory().verifyCanRead().verifyExists());
-		parser.addArgument("-m", "--campaignmode").nargs(1).type(String.class);
-		parser.addArgument("-E", "--exportsheet").nargs(1)
-			.type(Arguments.fileType().verifyCanRead().verifyExists().verifyIsFile());
 
 		parser.addArgument("-o", "--outputfile").nargs(1)
 			.type(Arguments.fileType().verifyCanCreate().verifyCanWrite().verifyNotExists());
