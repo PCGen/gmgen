@@ -26,7 +26,6 @@ import java.util.Objects;
 import javax.swing.ActionMap;
 import javax.swing.JOptionPane;
 
-import gmgen.GMGenSystem;
 import pcgen.facade.core.CharacterFacade;
 import pcgen.facade.core.SourceSelectionFacade;
 import pcgen.facade.util.ReferenceFacade;
@@ -34,9 +33,6 @@ import pcgen.facade.util.event.ReferenceEvent;
 import pcgen.facade.util.event.ReferenceListener;
 import pcgen.gui2.coreview.CoreViewFrame;
 import pcgen.gui2.dialog.DataInstaller;
-import pcgen.gui2.dialog.ExportDialog;
-import pcgen.gui2.dialog.KitSelectionDialog;
-import pcgen.gui2.dialog.PrintPreviewDialog;
 import pcgen.gui2.solverview.SolverViewFrame;
 import pcgen.gui2.tools.DesktopBrowserLauncher;
 import pcgen.gui2.tools.Icons;
@@ -61,52 +57,48 @@ public final class PCGenActionMap extends ActionMap
 {
 
 	//the File menu commands
-	public static final String FILE_COMMAND = "file";
-	public static final String NEW_COMMAND = FILE_COMMAND + ".new";
-	public static final String OPEN_COMMAND = FILE_COMMAND + ".open";
-	public static final String OPEN_RECENT_COMMAND = FILE_COMMAND + ".openrecent";
-	public static final String CLOSE_COMMAND = FILE_COMMAND + ".close";
-	public static final String CLOSEALL_COMMAND = FILE_COMMAND + ".closeall";
-	public static final String SAVE_COMMAND = FILE_COMMAND + ".save";
-	public static final String SAVEAS_COMMAND = FILE_COMMAND + ".saveas";
-	public static final String SAVEALL_COMMAND = FILE_COMMAND + ".saveall";
-	public static final String REVERT_COMMAND = FILE_COMMAND + ".reverttosaved";
-	public static final String PARTY_COMMAND = FILE_COMMAND + ".party";
-	public static final String OPEN_PARTY_COMMAND = PARTY_COMMAND + ".open";
-	public static final String OPEN_RECENT_PARTY_COMMAND = PARTY_COMMAND + ".openrecent";
-	public static final String CLOSE_PARTY_COMMAND = PARTY_COMMAND + ".close";
-	public static final String SAVE_PARTY_COMMAND = PARTY_COMMAND + ".save";
-	public static final String SAVEAS_PARTY_COMMAND = PARTY_COMMAND + ".saveas";
-	public static final String PRINT_COMMAND = FILE_COMMAND + ".print";
-	public static final String EXPORT_COMMAND = FILE_COMMAND + ".export";
-	public static final String EXIT_COMMAND = FILE_COMMAND + ".exit";
+	private static final String FILE_COMMAND = "file";
+	static final String NEW_COMMAND = FILE_COMMAND + ".new";
+	private static final String OPEN_COMMAND = FILE_COMMAND + ".open";
+	private static final String OPEN_RECENT_COMMAND = FILE_COMMAND + ".openrecent";
+	static final String CLOSE_COMMAND = FILE_COMMAND + ".close";
+	private static final String CLOSEALL_COMMAND = FILE_COMMAND + ".closeall";
+	static final String SAVE_COMMAND = FILE_COMMAND + ".save";
+	static final String SAVEAS_COMMAND = FILE_COMMAND + ".saveas";
+	private static final String SAVEALL_COMMAND = FILE_COMMAND + ".saveall";
+	private static final String REVERT_COMMAND = FILE_COMMAND + ".reverttosaved";
+	private static final String PARTY_COMMAND = FILE_COMMAND + ".party";
+	private static final String OPEN_PARTY_COMMAND = PARTY_COMMAND + ".open";
+	private static final String OPEN_RECENT_PARTY_COMMAND = PARTY_COMMAND + ".openrecent";
+	private static final String CLOSE_PARTY_COMMAND = PARTY_COMMAND + ".close";
+	private static final String SAVE_PARTY_COMMAND = PARTY_COMMAND + ".save";
+	private static final String SAVEAS_PARTY_COMMAND = PARTY_COMMAND + ".saveas";
+	private static final String EXIT_COMMAND = FILE_COMMAND + ".exit";
 	//the Edit menu commands
-	public static final String EDIT_COMMAND = "edit";
-	public static final String ADD_KIT_COMMAND = EDIT_COMMAND + ".addkit";
-	public static final String TEMP_BONUS_COMMAND = EDIT_COMMAND + ".tempbonus";
-	public static final String EQUIPMENTSET_COMMAND = EDIT_COMMAND + ".equipmentset";
+	private static final String EDIT_COMMAND = "edit";
+	static final String ADD_KIT_COMMAND = EDIT_COMMAND + ".addkit";
+	private static final String TEMP_BONUS_COMMAND = EDIT_COMMAND + ".tempbonus";
+	private static final String EQUIPMENTSET_COMMAND = EDIT_COMMAND + ".equipmentset";
 	//the Source menu commands
-	public static final String SOURCES_COMMAND = "sources";
-	public static final String SOURCES_LOAD_COMMAND = SOURCES_COMMAND + ".load";
-	public static final String SOURCES_LOAD_SELECT_COMMAND = SOURCES_COMMAND + ".select";
-	public static final String SOURCES_RELOAD_COMMAND = SOURCES_COMMAND + ".reload";
-	public static final String SOURCES_UNLOAD_COMMAND = SOURCES_COMMAND + ".unload";
-	public static final String INSTALL_DATA_COMMAND = SOURCES_COMMAND + ".installData";
+	private static final String SOURCES_COMMAND = "sources";
+	private static final String SOURCES_LOAD_COMMAND = SOURCES_COMMAND + ".load";
+	private static final String SOURCES_LOAD_SELECT_COMMAND = SOURCES_COMMAND + ".select";
+	private static final String SOURCES_RELOAD_COMMAND = SOURCES_COMMAND + ".reload";
+	private static final String SOURCES_UNLOAD_COMMAND = SOURCES_COMMAND + ".unload";
+	private static final String INSTALL_DATA_COMMAND = SOURCES_COMMAND + ".installData";
 	//the tools menu commands
-	public static final String TOOLS_COMMAND = "tools";
-	public static final String PREFERENCES_COMMAND = TOOLS_COMMAND + ".preferences";
-	public static final String GMGEN_COMMAND = TOOLS_COMMAND + ".gmgen";
-	public static final String LOG_COMMAND = TOOLS_COMMAND + ".log";
-	public static final String LOGGING_LEVEL_COMMAND = TOOLS_COMMAND + ".loggingLevel";
-	public static final String CALCULATOR_COMMAND = TOOLS_COMMAND + ".calculator";
-	public static final String COREVIEW_COMMAND = TOOLS_COMMAND + ".coreview";
-	public static final String SOLVERVIEW_COMMAND = TOOLS_COMMAND + ".solverview";
+	private static final String TOOLS_COMMAND = "tools";
+	static final String GMGEN_COMMAND = TOOLS_COMMAND + ".gmgen";
+	static final String LOG_COMMAND = TOOLS_COMMAND + ".log";
+	private static final String LOGGING_LEVEL_COMMAND = TOOLS_COMMAND + ".loggingLevel";
+	private static final String CALCULATOR_COMMAND = TOOLS_COMMAND + ".calculator";
+	private static final String COREVIEW_COMMAND = TOOLS_COMMAND + ".coreview";
+	private static final String SOLVERVIEW_COMMAND = TOOLS_COMMAND + ".solverview";
 	//the help menu commands
-	public static final String HELP_COMMAND = "help";
-	public static final String HELP_DOCS_COMMAND = HELP_COMMAND + ".docs";
-	public static final String HELP_OGL_COMMAND = HELP_COMMAND + ".ogl";
-	public static final String HELP_TIPOFTHEDAY_COMMAND = HELP_COMMAND + ".tod";
-	public static final String HELP_ABOUT_COMMAND = HELP_COMMAND + ".about";
+	private static final String HELP_COMMAND = "help";
+	private static final String HELP_DOCS_COMMAND = HELP_COMMAND + ".docs";
+	private static final String HELP_OGL_COMMAND = HELP_COMMAND + ".ogl";
+	private static final String HELP_ABOUT_COMMAND = HELP_COMMAND + ".about";
 	private final PCGenFrame frame;
 
 	public static final String MNU_TOOLS = "mnuTools"; //$NON-NLS-1$
@@ -119,7 +111,7 @@ public final class PCGenActionMap extends ActionMap
 	 */
 	private final UIContext uiContext;
 
-	public PCGenActionMap(PCGenFrame frame, UIContext uiContext)
+	PCGenActionMap(PCGenFrame frame, UIContext uiContext)
 	{
 		this.uiContext = Objects.requireNonNull(uiContext);
 		this.frame = frame;
@@ -146,16 +138,11 @@ public final class PCGenActionMap extends ActionMap
 		put(SAVE_PARTY_COMMAND, new SavePartyAction());
 		put(SAVEAS_PARTY_COMMAND, new SaveAsPartyAction());
 
-		put(PRINT_COMMAND, new PrintAction());
-		put(EXPORT_COMMAND, new ExportAction());
 		put(EXIT_COMMAND, new ExitAction());
 
 		put(EDIT_COMMAND, new EditAction());
-		put(ADD_KIT_COMMAND, new AddKitAction());
 		put(EQUIPMENTSET_COMMAND, new EquipmentSetAction());
 		put(TEMP_BONUS_COMMAND, new TempBonusAction());
-		put(PREFERENCES_COMMAND, new PreferencesAction());
-		put(GMGEN_COMMAND, new GMGenAction());
 		put(LOG_COMMAND, new DebugAction());
 		put(LOGGING_LEVEL_COMMAND, new LoggingLevelAction());
 		put(CALCULATOR_COMMAND, new CalculatorAction());
@@ -169,7 +156,6 @@ public final class PCGenActionMap extends ActionMap
 		put(HELP_COMMAND, new HelpAction());
 		put(HELP_DOCS_COMMAND, new DocsHelpAction());
 		put(HELP_OGL_COMMAND, new OGLHelpAction());
-		put(HELP_TIPOFTHEDAY_COMMAND, new TipOfTheDayHelpAction());
 		put(HELP_ABOUT_COMMAND, new AboutHelpAction());
 	}
 
@@ -179,25 +165,6 @@ public final class PCGenActionMap extends ActionMap
 		private EditAction()
 		{
 			super(MNU_EDIT);
-		}
-
-	}
-
-	private final class AddKitAction extends CharacterAction
-	{
-
-		private AddKitAction()
-		{
-			super("mnuEditAddKit");
-			setEnabled(false);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			KitSelectionDialog kitDialog = new KitSelectionDialog(frame, frame.getSelectedCharacterRef().get());
-			kitDialog.setLocationRelativeTo(frame);
-			kitDialog.setVisible(true);
 		}
 
 	}
@@ -218,38 +185,6 @@ public final class PCGenActionMap extends ActionMap
 		private TempBonusAction()
 		{
 			super("mnuEditTempBonus");
-		}
-
-	}
-
-	private final class PreferencesAction extends PCGenAction
-	{
-
-		private PreferencesAction()
-		{
-			super(MNU_TOOLS_PREFERENCES, Icons.Preferences16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			PCGenUIManager.displayPreferencesDialog();
-		}
-
-	}
-
-	private static final class GMGenAction extends PCGenAction
-	{
-
-		private GMGenAction()
-		{
-			super("mnuToolsGMGen", GMGEN_COMMAND, null, Icons.gmgen_icon, GMGenSystem.APPLICATION_NAME);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			PCGenUIManager.displayGmGen();
 		}
 
 	}
@@ -648,38 +583,6 @@ public final class PCGenActionMap extends ActionMap
 
 	}
 
-	private final class PrintAction extends CharacterAction
-	{
-
-		private PrintAction()
-		{
-			super("mnuFilePrint", PRINT_COMMAND, "shortcut P", Icons.Print16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			PrintPreviewDialog.showPrintPreviewDialog(frame);
-		}
-
-	}
-
-	private final class ExportAction extends CharacterAction
-	{
-
-		private ExportAction()
-		{
-			super("mnuFileExport", EXPORT_COMMAND, "shift-shortcut P", Icons.Export16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			ExportDialog.showExportDialog(frame);
-		}
-
-	}
-
 	private final class ExitAction extends PCGenAction
 	{
 
@@ -827,22 +730,6 @@ public final class PCGenActionMap extends ActionMap
 		public void actionPerformed(ActionEvent e)
 		{
 			frame.showOGLDialog();
-		}
-
-	}
-
-	private final class TipOfTheDayHelpAction extends PCGenAction
-	{
-
-		private TipOfTheDayHelpAction()
-		{
-			super("mnuHelpTipOfTheDay", HELP_TIPOFTHEDAY_COMMAND, Icons.TipOfTheDay16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			PCGenFrame.showTipsOfTheDay();
 		}
 
 	}

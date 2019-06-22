@@ -82,18 +82,13 @@ import pcgen.gui2.dialog.PostLevelUpDialog;
 import pcgen.gui2.dialog.RadioChooserDialog;
 import pcgen.gui2.dialog.SpellChoiceDialog;
 import pcgen.gui2.sources.SourceSelectionDialog;
-import pcgen.gui2.tabs.InfoTabbedPane;
 import pcgen.gui2.tools.CharacterSelectionListener;
 import pcgen.gui2.tools.Icons;
-import pcgen.gui2.tools.TipOfTheDayHandler;
 import pcgen.gui2.util.ShowMessageGuiObserver;
 import pcgen.gui3.GuiAssertions;
 import pcgen.gui3.GuiUtility;
-import pcgen.gui3.JFXPanelFromResource;
-import pcgen.gui3.component.PCGenToolBar;
 import pcgen.gui3.dialog.AboutDialog;
 import pcgen.gui3.dialog.RememberingChoiceDialog;
-import pcgen.gui3.dialog.TipOfTheDayController;
 import pcgen.io.PCGFile;
 import pcgen.persistence.SourceFileLoader;
 import pcgen.system.CharacterManager;
@@ -109,11 +104,9 @@ import pcgen.util.chooser.ChooserFactory;
 import pcgen.util.chooser.RandomChooser;
 
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.ToolBar;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -127,9 +120,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 {
 
 	private final PCGenActionMap actionMap;
-	private final CharacterTabs characterTabs;
 	private final PCGenStatusBar statusBar;
-	private final PCGenMenuBar pcGenMenuBar;
 
 	/**
 	 * The context indicating what items are currently loaded/being processed in the UI
@@ -140,10 +131,10 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	private final DefaultReferenceFacade<CharacterFacade> currentCharacterRef;
 	private final DefaultReferenceFacade<DataSetFacade> currentDataSetRef;
 	private final FilenameListener filenameListener;
-	private JDialog sourceSelectionDialog = null;
-	private SourceLoadWorker sourceLoader = null;
-	private String section15 = null;
-	private String lastCharacterPath = null;
+	private JDialog sourceSelectionDialog;
+	private SourceLoadWorker sourceLoader;
+	private String section15;
+	private String lastCharacterPath;
 	/**
 	 * This is a bit of a hack until we're full on JavaFX for showing dialogs
 	 */
@@ -157,13 +148,11 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		this.currentCharacterRef = new DefaultReferenceFacade<>();
 		this.currentDataSetRef = new DefaultReferenceFacade<>();
 		this.actionMap = new PCGenActionMap(this, uiContext);
-		this.characterTabs = new CharacterTabs(this);
 		this.statusBar = new PCGenStatusBar(this);
 		this.filenameListener = new FilenameListener();
 		Observer messageObserver = new ShowMessageGuiObserver(this);
 		ShowMessageDelegate.getInstance().addObserver(messageObserver);
 		ChooserFactory.setDelegate(this);
-		this.pcGenMenuBar = new PCGenMenuBar(this, uiContext);
 		initComponents();
 		pack();
 		initSettings();
@@ -180,15 +169,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		root.setActionMap(actionMap);
 		root.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, createInputMap(actionMap));
 
-		characterTabs.add(new InfoGuidePane(this, uiContext));
-
-		setJMenuBar(pcGenMenuBar);
-		PCGenToolBar pcGenToolBar = new PCGenToolBar(this);
-		ToolBar toolBar = pcGenToolBar.buildMenu();
-		JFXPanel wrappedToolBar = GuiUtility.wrapParentAsJFXPanel(toolBar);
-
-		add(wrappedToolBar, BorderLayout.NORTH);
-		add(characterTabs, BorderLayout.CENTER);
 		add(statusBar, BorderLayout.SOUTH);
 		updateTitle();
 		setIconImage(Icons.PCGenApp.getImageIcon().getImage());
@@ -235,27 +215,11 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		{
 			try
 			{
-				boolean alternateStartup = false;
-				alternateStartup |= maybeLoadCampaign();
-				alternateStartup |= maybeLoadOrCreateCharacter();
-				alternateStartup |= maybeStartInGMGen();
-				alternateStartup |= maybeAutoLoadSources();
+				maybeLoadCampaign();
+				maybeLoadOrCreateCharacter();
+				PCGenUIManager.displayGmGen();
+				maybeAutoLoadSources();
 
-				if (!alternateStartup)
-				{
-					//Do a default startup
-					SwingUtilities.invokeLater(() -> {
-						if (TipOfTheDayHandler.shouldShowTipOfTheDay())
-						{
-							showTipsOfTheDay();
-						}
-
-						if (!SourceSelectionDialog.skipSourceSelection())
-						{
-							showSourceSelectionDialog();
-						}
-					});
-				}
 			}
 			catch (InterruptedException | InvocationTargetException ex)
 			{
@@ -375,12 +339,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 				//TODO: complain about it
 				return false;
 			}
-			if (Main.shouldStartInCharacterSheet())
-			{
-				String key = UIPropertyContext.C_PROP_INITIAL_TAB;
-				key = UIPropertyContext.createFilePropertyKey(file, key);
-				UIPropertyContext.getInstance().setInt(key, InfoTabbedPane.CHARACTER_SHEET_TAB);
-			}
 			GuiAssertions.assertIsNotSwingThread();
 			SwingUtilities.invokeAndWait(() -> {
 				if (!file.exists())
@@ -396,16 +354,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 					openCharacter(file, dataset);
 				}
 			});
-			return true;
-		}
-
-		private boolean maybeStartInGMGen()
-		{
-			if (!Main.shouldStartInGMGen())
-			{
-				return false;
-			}
-			PCGenUIManager.displayGmGen();
 			return true;
 		}
 
@@ -425,7 +373,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		return inputMap;
 	}
 
-	public PCGenActionMap getActionMap()
+	PCGenActionMap getActionMap()
 	{
 		return actionMap;
 	}
@@ -442,10 +390,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		if (character != null && character.getFileRef() != null)
 		{
 			character.getFileRef().addReferenceListener(filenameListener);
-		}
-		if (character != null)
-		{
-			pcGenMenuBar.setCharacter(character);
 		}
 	}
 
@@ -591,7 +535,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * @param character
 	 * @return value from CharacterManager.saveCharacter()
 	 */
-	public boolean reallySaveCharacter(CharacterFacade character)
+	private boolean reallySaveCharacter(CharacterFacade character)
 	{
 		boolean result = false;
 
@@ -676,7 +620,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		CharacterManager.removeCharacter(character);
 	}
 
-	public boolean closeAllCharacters()
+	boolean closeAllCharacters()
 	{
 		final int CLOSE_OPT_CHOOSE = 2;
 		ListFacade<CharacterFacade> characters = CharacterManager.getCharacters();
@@ -920,7 +864,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * new character tab.
 	 * @param character The character being saved.
 	 */
-	public void revertCharacter(CharacterFacade character)
+	void revertCharacter(CharacterFacade character)
 	{
 		if (character.isDirty())
 		{
@@ -1206,7 +1150,7 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		}).start();
 	}
 
-	public void loadPartyFromFile(final File pcpFile)
+	void loadPartyFromFile(final File pcpFile)
 	{
 		if (!PCGFile.isPCGenPartyFile(pcpFile))
 		{
@@ -1307,21 +1251,9 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	}
 
 	/**
-	 * display the tips of the day dialog to the user
-	 */
-	static void showTipsOfTheDay()
-	{
-		var totd = new JFXPanelFromResource<>(
-				TipOfTheDayController.class,
-				"TipOfTheDay.fxml"
-		);
-		totd.showAsStage(LanguageBundle.getString("in_tod_title"));
-	}
-
-	/**
 	 * display the source selection dialog to the user
 	 */
-	public void showSourceSelectionDialog()
+	void showSourceSelectionDialog()
 	{
 		if (sourceSelectionDialog == null)
 		{
@@ -1507,14 +1439,14 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	 * has selected. After the sources are loaded the thread then
 	 * displays the licenses for the data.
 	 */
-	private class SourceLoadWorker extends Thread
+	private final class SourceLoadWorker extends Thread
 	{
 
 		private final SourceSelectionFacade sources;
 		private final SourceFileLoader loader;
 		private final SwingWorker<List<LogRecord>, List<LogRecord>> worker;
 
-		public SourceLoadWorker(SourceSelectionFacade sources, UIDelegate delegate)
+		private SourceLoadWorker(SourceSelectionFacade sources, UIDelegate delegate)
 		{
 			this.sources = sources;
 			loader = new SourceFileLoader(sources, delegate);
