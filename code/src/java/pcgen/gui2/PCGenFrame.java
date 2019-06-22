@@ -74,7 +74,6 @@ import pcgen.facade.util.ReferenceFacade;
 import pcgen.facade.util.event.ReferenceEvent;
 import pcgen.facade.util.event.ReferenceListener;
 import pcgen.gui2.dialog.ChooserDialog;
-import pcgen.gui2.dialog.PostLevelUpDialog;
 import pcgen.gui2.dialog.RadioChooserDialog;
 import pcgen.gui2.tools.CharacterSelectionListener;
 import pcgen.gui2.tools.Icons;
@@ -185,7 +184,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 	void startPCGenFrame()
 	{
 		GuiAssertions.assertIsSwingThread();
-		setVisible(true);
 		new StartupWorker().start();
 	}
 
@@ -1240,12 +1238,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		dialog.setTitle(title);
 		dialog.setContentText(message);
 		return GuiUtility.runOnJavaFXThreadNow(dialog::showAndWait);
-	}
-
-	@Override
-	public void showLevelUpInfo(CharacterFacade character, int oldLevel)
-	{
-		PostLevelUpDialog.showPostLevelUpDialog(this, character, oldLevel);
 	}
 
 	@Override

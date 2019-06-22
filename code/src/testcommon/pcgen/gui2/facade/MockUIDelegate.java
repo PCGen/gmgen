@@ -19,7 +19,6 @@ package pcgen.gui2.facade;
 
 import java.util.Optional;
 
-import pcgen.facade.core.CharacterFacade;
 import pcgen.facade.core.ChooserFacade;
 import pcgen.facade.core.UIDelegate;
 import pcgen.system.PropertyContext;
@@ -57,15 +56,6 @@ public class MockUIDelegate implements UIDelegate
 	public void showInfoMessage(String title, String message)
 	{
 		Logging.log(Logging.INFO, title + " - " + message);
-	}
-
-	/**
-	 * @see pcgen.facade.core.UIDelegate#showLevelUpInfo(CharacterFacade, int)
-	 */
-    @Override
-	public void showLevelUpInfo(CharacterFacade character, int oldLevel)
-	{
-		// No action
 	}
 
 	/**
