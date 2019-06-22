@@ -25,7 +25,6 @@ import java.util.Set;
 import pcgen.cdom.formula.PluginFunctionLibrary;
 import pcgen.core.bonus.BonusObj;
 import pcgen.core.prereq.PrerequisiteTestFactory;
-import pcgen.gui2.converter.TokenConverter;
 import pcgen.io.ExportHandler;
 import pcgen.io.exporttoken.Token;
 import pcgen.persistence.PersistenceLayerException;
@@ -45,11 +44,11 @@ import pcgen.util.PJEP;
 public final class TokenRegistration
 {
 
-	public static final Set<String> PPI_SET = new HashSet<>();
-	public static final Set<String> PW_SET = new HashSet<>();
-	public static final Set<LstToken> TOKEN_SET = new HashSet<>();
-	public static final Set<Token> EXPORT_SET = new HashSet<>();
-	public static final Set<ModifierFactory<?>> M_SET = new HashSet<>();
+	private static final Set<String> PPI_SET = new HashSet<>();
+	private static final Set<String> PW_SET = new HashSet<>();
+	private static final Set<LstToken> TOKEN_SET = new HashSet<>();
+	private static final Set<Token> EXPORT_SET = new HashSet<>();
+	private static final Set<ModifierFactory<?>> M_SET = new HashSet<>();
 
 	private TokenRegistration()
 	{
@@ -113,8 +112,6 @@ public final class TokenRegistration
 		PrerequisiteWriterFactory.clear();
 		PJEP.clear();
 		ExportHandler.clear();
-		TokenConverter.clear();
-		TokenConverter.clearConstants();
 		PluginManager.clear();
 		PluginFunctionLibrary.clear();
 	}

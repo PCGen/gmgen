@@ -18,7 +18,6 @@
  */
 package pcgen.system;
 
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
@@ -40,8 +39,6 @@ import pcgen.core.prereq.PrerequisiteTestFactory;
 import pcgen.facade.core.UIDelegate;
 import pcgen.gui2.PCGenUIManager;
 import pcgen.gui2.UIPropertyContext;
-import pcgen.gui2.converter.TokenConverter;
-import pcgen.gui2.dialog.RandomNameDialog;
 import pcgen.gui3.JFXPanelFromResource;
 import pcgen.gui3.dialog.OptionsPathDialogController;
 import pcgen.gui3.preloader.PCGenPreloader;
@@ -78,7 +75,6 @@ public final class Main
 	private static PropertyContextFactory configFactory;
 
 	// TODO: move startup modes into an extensible class based system
-	private static boolean startNameGen;
 	private static String settingsDir;
 	private static String campaignMode;
 	private static String exportSheet;
@@ -133,13 +129,6 @@ public final class Main
 		configFactory.registerAndLoadPropertyContext(ConfigurationSettings.getInstance());
 
 		parseCommands(args);
-
-		if (startNameGen)
-		{
-			Component dialog = new RandomNameDialog(null, null);
-			dialog.setVisible(true);
-			System.exit(0);
-		}
 
 		if (exportSheet == null)
 		{
@@ -331,7 +320,6 @@ public final class Main
 		loader.addPluginLoader(PrerequisiteWriterFactory.getInstance());
 		loader.addPluginLoader(PJEP.getJepPluginLoader());
 		loader.addPluginLoader(ExportHandler.getPluginLoader());
-		loader.addPluginLoader(TokenConverter.getPluginLoader());
 		loader.addPluginLoader(PluginManager.getInstance());
 		loader.addPluginLoader(PluginFunctionLibrary.getInstance());
 		return loader;
@@ -413,9 +401,6 @@ public final class Main
 
 		MutuallyExclusiveGroup startupMode =
 				parser.addMutuallyExclusiveGroup().description("start up on a specific mode");
-
-		startupMode.addArgument("--name-generator").help("run the name generator").type(Boolean.class)
-			.action(Arguments.storeTrue());
 
 		startupMode.addArgument("-D", "--tab").nargs(1);
 
