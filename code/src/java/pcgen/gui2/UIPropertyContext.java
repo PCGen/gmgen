@@ -131,11 +131,6 @@ public final class UIPropertyContext extends PropertyContext
 		return Color.valueOf(prop);
 	}
 
-	public static Color getCustomItemColor()
-	{
-		return getInstance().getColor(CUSTOM_ITEM_COLOR);
-	}
-
 	public static void setQualifiedColor(Color color)
 	{
 		getInstance().setColor(QUALIFIED_COLOR, color);
