@@ -30,7 +30,7 @@ import pcgen.system.LanguageBundle;
 public class HtmlInfoBuilder
 {
 	/** Constant for 3 spaces in HTML */
-	public static final String THREE_SPACES = " &nbsp; "; //$NON-NLS-1$
+	private static final String THREE_SPACES = " &nbsp; "; //$NON-NLS-1$
 
 	private final StringBuilder buffer = new StringBuilder(300);
 	private final boolean fullDocument;

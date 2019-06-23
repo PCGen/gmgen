@@ -765,36 +765,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		return false;
 	}
 
-	/**
-	 * Revert the character to the previous save. If no previous save, open a
-	 * new character tab.
-	 * @param character The character being saved.
-	 */
-	void revertCharacter(CharacterFacade character)
-	{
-		if (character.isDirty())
-		{
-			int ret =
-					JOptionPane.showConfirmDialog(this,
-						LanguageBundle.getFormattedString("in_revertPcChoice", character //$NON-NLS-1$
-						.getNameRef().get()), Constants.APPLICATION_NAME, JOptionPane.YES_NO_OPTION);
-			if (ret == JOptionPane.YES_OPTION)
-			{
-				CharacterManager.removeCharacter(character);
-
-				if (character.getFileRef().get() != null && character.getFileRef().get().exists())
-				{
-					openCharacter(character.getFileRef().get(), currentDataSetRef.get());
-				}
-				else
-				{
-					createNewCharacter(null);
-				}
-			}
-		}
-
-	}
-
 	void showOpenCharacterChooser()
 	{
 		GuiAssertions.assertIsNotJavaFXThread();
@@ -843,30 +813,6 @@ public final class PCGenFrame extends JFrame implements UIDelegate, CharacterSel
 		{
 			loadPartyFromFile(file);
 		}
-	}
-
-	/**
-	 * creates a new character and sets its file if possible
-	 * then sets the character as the currently selected character
-	 * @param file the File for this character
-	 */
-	void createNewCharacter(File file)
-	{
-		GuiAssertions.assertIsSwingThread();
-		DataSetFacade data = getLoadedDataSetRef().get();
-		CharacterFacade character = CharacterManager.createNewCharacter(this, data);
-		//This is called before the we set it as the selected character so
-		//the InfoTabbedPane can catch any character specific properties when
-		//it is first displayed
-		if (file != null)
-		{
-			character.setFile(file);
-		}
-		//Because CharacterManager adds the new character to the character
-		//list before it returns, it is not necessary to update the character
-		//tabs since they will catch that event before the call to
-		//setCharacter is called
-		setCharacter(character);
 	}
 
 	/**

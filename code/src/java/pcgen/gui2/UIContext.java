@@ -42,7 +42,7 @@ public class UIContext
 	 * 
 	 * @return The reference to the currently loaded sources.
 	 */
-	public DefaultReferenceFacade<SourceSelectionFacade> getCurrentSourceSelectionRef()
+	DefaultReferenceFacade<SourceSelectionFacade> getCurrentSourceSelectionRef()
 	{
 		return currentSourceSelection;
 	}

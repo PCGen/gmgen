@@ -78,41 +78,6 @@ public final class CharacterManager
 	{
 	}
 
-	/**
-	 * Create a new character using the supplied data sets.
-	 * @param delegate the UIDelegate that this character will use.
-	 * @param dataset the dataset that this will be loaded with.
-	 * @return The character that was created.
-	 */
-	public static CharacterFacade createNewCharacter(UIDelegate delegate, DataSetFacade dataset)
-	{
-		@SuppressWarnings("rawtypes")
-		List campaigns = ListFacades.wrap(dataset.getCampaigns());
-		try
-		{
-			@SuppressWarnings("unchecked")
-			PlayerCharacter pc = new PlayerCharacter(campaigns);
-			Globals.getPCList().add(pc);
-			CharacterFacade character = new CharacterFacadeImpl(pc, delegate, dataset);
-			String name = createNewCharacterName();
-			character.setName(name);
-			CHARACTERS.addElement(character);
-			Logging.log(Logging.INFO, "Created new character " + name + '.'); //$NON-NLS-1$ 
-			MESSAGE_HANDLER.handleMessage(new PlayerCharacterWasLoadedMessage(delegate, pc));
-			return character;
-		}
-		catch (final Exception e)
-		{
-			Logging.errorPrint("Unable to create character with data " //$NON-NLS-1$
-				+ dataset, e);
-			delegate.showErrorMessage(LanguageBundle.getString("in_cmCreateErrorTitle"), //$NON-NLS-1$
-				LanguageBundle.getFormattedString("in_cmCreateErrorMessage", //$NON-NLS-1$
-					e.getMessage()));
-			return null;
-		}
-
-	}
-
 	public static ListFacade<File> getRecentCharacters()
 	{
 		return RECENT_CHARACTERS;
@@ -513,29 +478,6 @@ public final class CharacterManager
 			}
 		}
 		return null;
-	}
-
-	private static String createNewCharacterName()
-	{
-		String name = "Unnamed ";
-		int i = 1;
-		while (isNameUsed(name + i))
-		{
-			i++;
-		}
-		return name + i;
-	}
-
-	private static boolean isNameUsed(String name)
-	{
-		for (final CharacterFacade character : CHARACTERS)
-		{
-			if (character.getNameRef().get().equals(name))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 }
