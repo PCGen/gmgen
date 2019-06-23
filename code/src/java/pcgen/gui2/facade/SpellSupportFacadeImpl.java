@@ -17,8 +17,12 @@
  */
 package pcgen.gui2.facade;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,6 +68,7 @@ import pcgen.core.display.CharacterDisplay;
 import pcgen.core.spell.Spell;
 import pcgen.core.utils.MessageType;
 import pcgen.core.utils.ShowMessageDelegate;
+import pcgen.facade.core.CharacterFacade;
 import pcgen.facade.core.ChooserFacade.ChooserTreeViewType;
 import pcgen.facade.core.DataSetFacade;
 import pcgen.facade.core.EquipmentFacade;
@@ -82,6 +87,8 @@ import pcgen.facade.util.event.ListListener;
 import pcgen.gui2.tools.DesktopBrowserLauncher;
 import pcgen.gui2.util.HtmlInfoBuilder;
 import pcgen.gui3.GuiUtility;
+import pcgen.io.ExportException;
+import pcgen.io.ExportHandler;
 import pcgen.io.ExportUtilities;
 import pcgen.system.BatchExporter;
 import pcgen.system.LanguageBundle;
@@ -133,8 +140,8 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 	 * @param todoManager The user tasks tracker.
 	 * @param pcFacade The character facade. 
 	 */
-	public SpellSupportFacadeImpl(PlayerCharacter pc, UIDelegate delegate, DataSetFacade dataSet,
-		TodoManager todoManager, CharacterFacadeImpl pcFacade)
+	SpellSupportFacadeImpl(PlayerCharacter pc, UIDelegate delegate, DataSetFacade dataSet,
+	                       TodoManager todoManager, CharacterFacadeImpl pcFacade)
 	{
 		this.pc = pc;
 		this.infoFactory = pcFacade.getInfoFactory();
@@ -159,6 +166,41 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		buildKnownPreparedNodes();
 
 		updateSpellsTodo();
+	}
+
+	/**
+	 * Write a non PDF (e.g. html, text) character sheet for the character to
+	 * the output file. The character sheet will be built according to the
+	 * template file. If the output file exists it will be overwritten.
+	 *
+	 * @param character The already loaded character to be output.
+	 * @param outFile The file to which the character sheet is to be written.
+	 * @param templateFile The file that has the export template definition.
+	 * @return true if the export was successful, false if it failed in some way.
+	 */
+	private static boolean exportCharacterToNonPDF(CharacterFacade character, File outFile, File templateFile)
+	{
+		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8")))
+		{
+			character.export(new ExportHandler(templateFile), bw);
+			character.setDefaultOutputSheet(false, templateFile);
+			return true;
+		}
+		catch (final UnsupportedEncodingException e)
+		{
+			Logging.errorPrint("Unable to create output file " + outFile.getAbsolutePath(), e);
+			return false;
+		}
+		catch (final IOException e)
+		{
+			Logging.errorPrint("Unable to create output file " + outFile.getAbsolutePath(), e);
+			return false;
+		}
+		catch (final ExportException e)
+		{
+			// Error will already be reported to the log
+			return false;
+		}
 	}
 
 	@Override
@@ -1218,7 +1260,7 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		}
 		else
 		{
-			success = BatchExporter.exportCharacterToNonPDF(pcFacade, outputFile, templateFile);
+			success = exportCharacterToNonPDF(pcFacade, outputFile, templateFile);
 		}
 		if (success)
 		{
@@ -1284,7 +1326,7 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 			}
 			else
 			{
-				success = BatchExporter.exportCharacterToNonPDF(pcFacade, outFile, templateFile);
+				success = exportCharacterToNonPDF(pcFacade, outFile, templateFile);
 			}
 
 			if (!success)
@@ -1327,7 +1369,7 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		 * @param level The level of the spell.
 		 * @param rootNode The top level node this entry will appear under. 
 		 */
-		public SpellNodeImpl(SpellFacade spell, PCClass cls, String level, RootNode rootNode)
+		private SpellNodeImpl(SpellFacade spell, PCClass cls, String level, RootNode rootNode)
 		{
 			this.spell = spell;
 			this.cls = cls;
@@ -1342,7 +1384,7 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		 * @param level The level of the spell.
 		 * @param rootNode The top level node this entry will appear under. 
 		 */
-		public SpellNodeImpl(SpellFacade spell, String level, RootNode rootNode)
+		private SpellNodeImpl(SpellFacade spell, String level, RootNode rootNode)
 		{
 			this(spell, (PCClass) null, level, rootNode);
 		}
@@ -1507,7 +1549,7 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		 * Create a new instance of DummySpellNodeImpl
 		 * @param rootNode The root node for the spell list.
 		 */
-		public DummySpellNodeImpl(RootNode rootNode)
+		private DummySpellNodeImpl(RootNode rootNode)
 		{
 			this.rootNode = rootNode;
 		}

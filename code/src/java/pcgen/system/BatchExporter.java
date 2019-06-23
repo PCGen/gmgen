@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 
 import pcgen.cdom.base.Constants;
@@ -37,15 +36,10 @@ import pcgen.core.SettingsHandler;
 import pcgen.core.utils.MessageType;
 import pcgen.core.utils.ShowMessageDelegate;
 import pcgen.facade.core.CharacterFacade;
-import pcgen.facade.core.PartyFacade;
-import pcgen.facade.core.SourceSelectionFacade;
-import pcgen.facade.core.UIDelegate;
 import pcgen.gui2.UIPropertyContext;
 import pcgen.io.ExportException;
 import pcgen.io.ExportHandler;
 import pcgen.io.ExportUtilities;
-import pcgen.io.PCGFile;
-import pcgen.persistence.SourceFileLoader;
 import pcgen.util.Logging;
 import pcgen.util.fop.FopTask;
 
@@ -66,132 +60,11 @@ import org.apache.commons.lang3.StringUtils;
  *
  * 
  */
-public class BatchExporter
+public final class BatchExporter
 {
 
-	private final String exportTemplateFilename;
-	private final UIDelegate uiDelegate;
-	private final boolean isPdf;
-
-	/**
-	 * Create a new instance of BatchExporter for use with a particular export
-	 * template.
-	 *   
-	 * @param exportTemplateFilename The path to the export template.
-	 * @param uiDelegate The object through which to report any issues to the user.
-	 */
-	BatchExporter(String exportTemplateFilename, UIDelegate uiDelegate)
+	private BatchExporter()
 	{
-		this.exportTemplateFilename = exportTemplateFilename;
-		this.uiDelegate = uiDelegate;
-
-		isPdf = ExportUtilities.isPdfTemplate(exportTemplateFilename);
-	}
-
-	/**
-	 * Export a character sheet for the character to the output file using the 
-	 * pre-registered template. If the output file is null then a default file 
-	 * will be used based on the character file name and the type of export 
-	 * template in use. If the output file exists it will be overwritten.
-	 * <p>
-	 * This method will load the required data for the character, load the 
-	 * character and then export the character sheet.
-	 * 
-	 * @param characterFilename The path to the character PCG file.
-	 * @param outputFile The path to the output file to be created. May be null.
-	 * @return true if the export was successful, false if it failed in some way.
-	 */
-	boolean exportCharacter(String characterFilename, String outputFile)
-	{
-		File file = new File(characterFilename);
-		if (!PCGFile.isPCGenCharacterFile(file))
-		{
-			Logging.errorPrint("Invalid character file specified: " + file.getAbsolutePath());
-			return false;
-		}
-		String outFilename = outputFile;
-		if (outFilename == null)
-		{
-			outFilename = generateOutputFilename(characterFilename);
-		}
-		Logging.log(Logging.INFO,
-			"Started export of " + file.getAbsolutePath() + " using " + exportTemplateFilename + " to " + outFilename);
-
-		// Load data
-		SourceSelectionFacade sourcesForCharacter = CharacterManager.getRequiredSourcesForCharacter(file, uiDelegate);
-		Logging.log(Logging.INFO, "Loading sources " + sourcesForCharacter.getCampaigns() + " using game mode "
-			+ sourcesForCharacter.getGameMode());
-		SourceFileLoader loader = new SourceFileLoader(sourcesForCharacter, uiDelegate);
-		loader.run();
-
-		// Load character
-		CharacterFacade character = CharacterManager.openCharacter(file, uiDelegate, loader.getDataSetFacade());
-		if (character == null)
-		{
-			return false;
-		}
-
-		// Export character
-		File templateFile = new File(exportTemplateFilename);
-		File outFile = new File(outFilename);
-		if (isPdf)
-		{
-			return exportCharacterToPDF(character, outFile, templateFile);
-		}
-		else
-		{
-			return exportCharacterToNonPDF(character, outFile, templateFile);
-		}
-	}
-
-	/**
-	 * Export a party sheet for the party to the output file using the 
-	 * pre-registered template. If the output file is null then a default file 
-	 * will be used based on the party file name and the type of export 
-	 * template in use. If the output file exists it will be overwritten.
-	 * <p>
-	 * This method will load the required data for the party, load the characters 
-	 * in the party and then export the party sheet.
-	 * 
-	 * @param partyFilename The path to the party PCP file.
-	 * @param outputFile The path to the output file to be created. May be null.
-	 * @return true if the export was successful, false if it failed in some way.
-	 */
-	boolean exportParty(String partyFilename, String outputFile)
-	{
-		File file = new File(partyFilename);
-		if (!PCGFile.isPCGenPartyFile(file))
-		{
-			Logging.errorPrint("Invalid party file specified: " + file.getAbsolutePath());
-			return false;
-		}
-		String outFilename = outputFile;
-		if (outFilename == null)
-		{
-			outFilename = generateOutputFilename(partyFilename);
-		}
-		Logging.log(Logging.INFO, "Started export of party " + file.getAbsolutePath() + " using "
-			+ exportTemplateFilename + " to " + outFilename);
-
-		// Load data
-		SourceSelectionFacade sourcesForCharacter = CharacterManager.getRequiredSourcesForParty(file, uiDelegate);
-		SourceFileLoader loader = new SourceFileLoader(sourcesForCharacter, uiDelegate);
-		loader.run();
-
-		// Load party
-		PartyFacade party = CharacterManager.openParty(file, uiDelegate, loader.getDataSetFacade());
-
-		// Export party
-		File templateFile = new File(exportTemplateFilename);
-		File outFile = new File(outFilename);
-		if (isPdf)
-		{
-			return exportPartyToPDF(party, outFile, templateFile);
-		}
-		else
-		{
-			return exportPartyToNonPDF(party, outFile, templateFile);
-		}
 	}
 
 	/**
@@ -253,41 +126,6 @@ public class BatchExporter
 	}
 
 	/**
-	 * Write a non PDF (e.g. html, text) character sheet for the character to 
-	 * the output file. The character sheet will be built according to the 
-	 * template file. If the output file exists it will be overwritten.
-	 *    
-	 * @param character The already loaded character to be output.
-	 * @param outFile The file to which the character sheet is to be written. 
-	 * @param templateFile The file that has the export template definition.  
-	 * @return true if the export was successful, false if it failed in some way.
-	 */
-	public static boolean exportCharacterToNonPDF(CharacterFacade character, File outFile, File templateFile)
-	{
-		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8")))
-		{
-			character.export(new ExportHandler(templateFile), bw);
-			character.setDefaultOutputSheet(false, templateFile);
-			return true;
-		}
-		catch (final UnsupportedEncodingException e)
-		{
-			Logging.errorPrint("Unable to create output file " + outFile.getAbsolutePath(), e);
-			return false;
-		}
-		catch (final IOException e)
-		{
-			Logging.errorPrint("Unable to create output file " + outFile.getAbsolutePath(), e);
-			return false;
-		}
-		catch (final ExportException e)
-		{
-			// Error will already be reported to the log
-			return false;
-		}
-	}
-
-	/**
 	 * Get a temporary file name for outputting a character using a particular
 	 * output template.
 	 * @param templateFile The output template that will be used.
@@ -311,125 +149,6 @@ public class BatchExporter
 			return null;
 		}
 
-	}
-
-	/**
-	 * Write a PDF party sheet for the characters in the party to the output 
-	 * file. The party sheet will be built according to the template file. If  
-	 * the output file exists it will be overwritten.
-	 *    
-	 * @param party The already loaded party of characters to be output.
-	 * @param outFile The file to which the party sheet is to be written. 
-	 * @param templateFile The file that has the export template definition.  
-	 * @return true if the export was successful, false if it failed in some way.
-	 */
-	public static boolean exportPartyToPDF(PartyFacade party, File outFile, File templateFile)
-	{
-		// We want the non pdf extension here for the intermediate file.
-		String templateExtension = ExportUtilities.getOutputExtension(templateFile.getName(), false);
-		boolean isTransformTemplate =
-				"xslt".equalsIgnoreCase(templateExtension) || "xsl".equalsIgnoreCase(templateExtension);
-
-		boolean useTempFile =
-				PCGenSettings.OPTIONS_CONTEXT.initBoolean(PCGenSettings.OPTION_GENERATE_TEMP_FILE_WITH_PDF, false);
-		String outFileName = FilenameUtils.removeExtension(outFile.getAbsolutePath());
-		File tempFile = new File(outFileName + (isTransformTemplate ? ".xml" : ".fo"));
-		try (BufferedOutputStream fileStream = new BufferedOutputStream(new FileOutputStream(outFile));
-				ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-				OutputStream exportOutput = useTempFile
-					//Output to both the byte stream and to the temp file.
-					? new TeeOutputStream(byteOutputStream, new FileOutputStream(tempFile)) : byteOutputStream)
-		{
-			FopTask task;
-			if (isTransformTemplate)
-			{
-				exportParty(party, exportOutput);
-				ByteArrayInputStream inputStream = new ByteArrayInputStream(byteOutputStream.toByteArray());
-				task = FopTask.newFopTask(inputStream, templateFile, fileStream);
-			}
-			else
-			{
-				SettingsHandler.setSelectedPartyPDFOutputSheet(templateFile.getAbsolutePath());
-
-				exportParty(party, templateFile, exportOutput);
-				ByteArrayInputStream inputStream = new ByteArrayInputStream(byteOutputStream.toByteArray());
-				task = FopTask.newFopTask(inputStream, null, fileStream);
-			}
-			task.run();
-		}
-		catch (final IOException | ExportException e)
-		{
-			Logging.errorPrint("BatchExporter.exportPartyToPDF failed", e);
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Write a non PDF (e.g. html, text) party sheet for the characters in the 
-	 * party to the output file. The party sheet will be built according to the 
-	 * template file. If the output file exists it will be overwritten.
-	 *    
-	 * @param party The already loaded party of characters to be output.
-	 * @param outFile The file to which the party sheet is to be written. 
-	 * @param templateFile The file that has the export template definition.  
-	 * @return true if the export was successful, false if it failed in some way.
-	 */
-	public static boolean exportPartyToNonPDF(PartyFacade party, File outFile, File templateFile)
-	{
-		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8")))
-		{
-			party.export(new ExportHandler(templateFile), bw);
-			return true;
-		}
-		catch (final IOException e)
-		{
-			Logging.errorPrint("Unable to create output file " + outFile.getAbsolutePath(), e);
-			return false;
-		}
-	}
-
-	/**
-	 * Write a party sheet for the characters in the party to the outputStream. The party sheet will
-	 * be selected based on the selected game mode and pcgen preferences.
-	 *
-	 * @param party the party to be output
-	 * @param outputStream the stream to output the party sheet to.
-	 * @throws IOException
-	 * @throws ExportException
-	 */
-	private static void exportParty(PartyFacade party, OutputStream outputStream) throws IOException, ExportException
-	{
-		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8")))
-		{
-			for (final CharacterFacade character : party)
-			{
-				File templateFile = getXMLTemplate(character);
-				character.export(new ExportHandler(templateFile), bw);
-			}
-		}
-	}
-
-	/**
-	 * Write a party sheet for the characters in the party to the ouputstream. The party sheet will
-	 * be built according to the template file.
-	 *
-	 * @param party the party to be output
-	 * @param templateFile The file that has the export template definition.
-	 * @param outputStream the stream to output the party sheet to.
-	 * @throws IOException
-	 * @throws ExportException
-	 */
-	private static void exportParty(PartyFacade party, File templateFile, OutputStream outputStream)
-		throws IOException, ExportException
-	{
-		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8")))
-		{
-			for (final CharacterFacade character : party)
-			{
-				character.export(new ExportHandler(templateFile), bw);
-			}
-		}
 	}
 
 	/**
@@ -474,7 +193,7 @@ public class BatchExporter
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @throws ExportException if there is an export exception
 	 */
-	public static void exportCharacter(CharacterFacade character, OutputStream outputStream)
+	private static void exportCharacter(CharacterFacade character, OutputStream outputStream)
 		throws IOException, ExportException
 	{
 		exportCharacter(character, getXMLTemplate(character), outputStream);
@@ -513,20 +232,4 @@ public class BatchExporter
 		return template;
 	}
 
-	/**
-	 * Create a default character sheet output file name based on the export
-	 * template type and the character file name. The output file will be 
-	 * in the same folder as the character file.
-	 * 
-	 * @param characterFilename The path to the character PCG file.
-	 * @return The default output file name.
-	 */
-	private String generateOutputFilename(String characterFilename)
-	{
-		File charFile = new File(characterFilename);
-		String charname = charFile.getName();
-		String extension = ExportUtilities.getOutputExtension(exportTemplateFilename, isPdf);
-		String outputName = charname.substring(0, charname.lastIndexOf('.')) + '.' + extension;
-		return new File(charFile.getParent(), outputName).getAbsolutePath();
-	}
 }
