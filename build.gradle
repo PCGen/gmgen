@@ -467,7 +467,6 @@ run {
     enableAssertions = true
 }
 
-apply from: 'code/gradle/autobuild.gradle'
 apply from: 'code/gradle/distribution.gradle'
 apply from: 'code/gradle/reporting.gradle'
 apply from: 'code/gradle/release.gradle'
