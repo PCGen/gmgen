@@ -32,7 +32,6 @@ import pcgen.facade.util.ReferenceFacade;
 import pcgen.facade.util.event.ReferenceEvent;
 import pcgen.facade.util.event.ReferenceListener;
 import pcgen.gui2.coreview.CoreViewFrame;
-import pcgen.gui2.dialog.DataInstaller;
 import pcgen.gui2.solverview.SolverViewFrame;
 import pcgen.gui2.tools.DesktopBrowserLauncher;
 import pcgen.gui2.tools.Icons;
@@ -118,17 +117,7 @@ public final class PCGenActionMap extends ActionMap
 	private void initActions()
 	{
 		put(FILE_COMMAND, new FileAction());
-		put(NEW_COMMAND, new NewAction());
-		put(OPEN_COMMAND, new OpenAction());
-		put(OPEN_RECENT_COMMAND, new OpenRecentAction());
-		put(CLOSE_COMMAND, new CloseAction());
-		put(CLOSEALL_COMMAND, new CloseAllAction());
-		put(SAVE_COMMAND, new SaveAction());
-		put(SAVEAS_COMMAND, new SaveAsAction());
-		put(SAVEALL_COMMAND, new SaveAllAction());
-		put(REVERT_COMMAND, new RevertAction());
 
-		put(PARTY_COMMAND, new PartyAction());
 		put(OPEN_PARTY_COMMAND, new OpenPartyAction());
 		put(OPEN_RECENT_PARTY_COMMAND, new OpenRecentAction());
 		put(CLOSE_PARTY_COMMAND, new ClosePartyAction());
@@ -145,7 +134,6 @@ public final class PCGenActionMap extends ActionMap
 		put(CALCULATOR_COMMAND, new CalculatorAction());
 		put(COREVIEW_COMMAND, new CoreViewAction());
 		put(SOLVERVIEW_COMMAND, new SolverViewAction());
-		put(INSTALL_DATA_COMMAND, new InstallDataAction());
 		put(SOURCES_RELOAD_COMMAND, new ReloadSourcesAction());
 		put(SOURCES_UNLOAD_COMMAND, new UnloadSourcesAction());
 
@@ -272,64 +260,12 @@ public final class PCGenActionMap extends ActionMap
 
 	}
 
-	/**
-	 * The tools menu action to open the install data dialog.
-	 */
-	private final class InstallDataAction extends PCGenAction
-	{
-
-		private InstallDataAction()
-		{
-			super("mnuSourcesInstallData");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			DataInstaller di = new DataInstaller();
-			di.setVisible(true);
-		}
-
-	}
-
 	private final class FileAction extends PCGenAction
 	{
 
 		private FileAction()
 		{
 			super(MNU_FILE);
-		}
-
-	}
-
-	private final class NewAction extends PCGenAction
-	{
-
-		private final ReferenceFacade<?> ref;
-
-		private NewAction()
-		{
-			super("mnuFileNew", NEW_COMMAND, "shortcut N", Icons.New16);
-			ref = frame.getLoadedDataSetRef();
-			ref.addReferenceListener(new SourceListener());
-			setEnabled(ref.get() != null);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.createNewCharacter(null);
-		}
-
-		private final class SourceListener implements ReferenceListener<Object>
-		{
-
-			@Override
-			public void referenceChanged(ReferenceEvent<Object> e)
-			{
-				setEnabled(e.getNewReference() != null);
-			}
-
 		}
 
 	}
@@ -482,22 +418,6 @@ public final class PCGenActionMap extends ActionMap
 		public void actionPerformed(ActionEvent e)
 		{
 			frame.saveAllCharacters();
-		}
-
-	}
-
-	private final class RevertAction extends CharacterAction
-	{
-
-		private RevertAction()
-		{
-			super("mnuFileRevertToSaved", REVERT_COMMAND, "shortcut R");
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.revertCharacter(frame.getSelectedCharacterRef().get());
 		}
 
 	}
@@ -734,11 +654,6 @@ public final class PCGenActionMap extends ActionMap
 	{
 
 		private final ReferenceFacade<?> ref;
-
-		private CharacterAction(String prop)
-		{
-			this(prop, null, null, null);
-		}
 
 		private CharacterAction(String prop, String command, String accelerator)
 		{

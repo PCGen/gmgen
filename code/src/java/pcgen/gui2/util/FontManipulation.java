@@ -166,36 +166,4 @@ public final class FontManipulation
 		return f.deriveFont(Font.ITALIC);
 	}
 
-	/**
-	 * For plain font.
-	 * 
-	 * @param f
-	 *            base font
-	 */
-	public static Font plain(Font f)
-	{
-		return f.deriveFont(Font.PLAIN);
-	}
-
-	/**
-	 * For bold font.
-	 * 
-	 * @param f
-	 *            base font
-	 */
-	public static Font bold(Font f)
-	{
-		return f.deriveFont(Font.BOLD);
-	}
-
-	/**
-	 * For bold italic font.
-	 * 
-	 * @param f
-	 *            base font
-	 */
-	public static Font bold_italic(Font f)
-	{
-		return f.deriveFont(Font.BOLD | Font.ITALIC);
-	}
 }

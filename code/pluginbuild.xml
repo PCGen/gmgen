@@ -59,14 +59,6 @@ jar-all-plugins - Generate the plugin jar files
 				</patternset>
 			</fileset>
 		</jar>
-		<jar jarfile="${plugins.dir}/PCGTracker.jar" manifest="${src.java.dir}/plugin/pcgtracker/manifest.mf">
-			<fileset dir="${build.classes.dir}">
-				<patternset>
-					<include name="plugin/pcgtracker/*.class" />
-					<include name="plugin/pcgtracker/gui/*.class" />
-				</patternset>
-			</fileset>
-		</jar>
 		<jar jarfile="${plugins.dir}/Overland.jar" manifest="${src.java.dir}/plugin/overland/manifest.mf">
 			<fileset dir="${build.classes.dir}">
 				<patternset>

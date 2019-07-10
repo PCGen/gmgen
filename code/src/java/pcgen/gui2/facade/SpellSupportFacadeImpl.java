@@ -30,37 +30,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import javax.swing.JOptionPane;
-
-import pcgen.base.lang.StringUtil;
 import pcgen.base.util.DoubleKeyMapToList;
 import pcgen.base.util.HashMapToList;
 import pcgen.cdom.base.CDOMList;
 import pcgen.cdom.base.CDOMObject;
 import pcgen.cdom.base.Constants;
 import pcgen.cdom.content.CNAbility;
-import pcgen.cdom.enumeration.AssociationKey;
 import pcgen.cdom.enumeration.FactKey;
 import pcgen.cdom.enumeration.IntegerKey;
-import pcgen.cdom.enumeration.ListKey;
 import pcgen.cdom.enumeration.ObjectKey;
-import pcgen.cdom.enumeration.SourceFormat;
 import pcgen.core.Ability;
 import pcgen.core.AbilityCategory;
-import pcgen.core.Domain;
 import pcgen.core.Equipment;
 import pcgen.core.Globals;
 import pcgen.core.PCClass;
 import pcgen.core.PObject;
 import pcgen.core.PlayerCharacter;
 import pcgen.core.Race;
-import pcgen.core.SettingsHandler;
-import pcgen.core.SpellProhibitor;
 import pcgen.core.SpellSupportForPCClass;
-import pcgen.core.analysis.OutputNameFormatting;
 import pcgen.core.character.CharacterSpell;
 import pcgen.core.character.SpellBook;
 import pcgen.core.character.SpellInfo;
@@ -84,20 +72,13 @@ import pcgen.facade.util.DefaultReferenceFacade;
 import pcgen.facade.util.ListFacade;
 import pcgen.facade.util.event.ListEvent;
 import pcgen.facade.util.event.ListListener;
-import pcgen.gui2.tools.DesktopBrowserLauncher;
-import pcgen.gui2.util.HtmlInfoBuilder;
-import pcgen.gui3.GuiUtility;
 import pcgen.io.ExportException;
 import pcgen.io.ExportHandler;
-import pcgen.io.ExportUtilities;
-import pcgen.system.BatchExporter;
 import pcgen.system.LanguageBundle;
-import pcgen.system.PCGenSettings;
 import pcgen.util.Logging;
 import pcgen.util.enumeration.Tab;
 import pcgen.util.enumeration.View;
 
-import javafx.stage.FileChooser;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -203,107 +184,6 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		}
 	}
 
-	@Override
-	public ListFacade<SpellNode> getAvailableSpellNodes()
-	{
-		return availableSpellNodes;
-	}
-
-	@Override
-	public ListFacade<SpellNode> getAllKnownSpellNodes()
-	{
-		return allKnownSpellNodes;
-	}
-
-	@Override
-	public ListFacade<SpellNode> getKnownSpellNodes()
-	{
-		return knownSpellNodes;
-	}
-
-	@Override
-	public ListFacade<SpellNode> getPreparedSpellNodes()
-	{
-		return preparedSpellNodes;
-	}
-
-	@Override
-	public ListFacade<SpellNode> getBookSpellNodes()
-	{
-		return bookSpellNodes;
-	}
-
-	@Override
-	public void addKnownSpell(SpellNode spell)
-	{
-		SpellNode node = addSpellToCharacter(spell, Globals.getDefaultSpellBook(), new ArrayList<>());
-		if (node != null)
-		{
-			allKnownSpellNodes.addElement(node);
-			knownSpellNodes.addElement(node);
-			if (!StringUtils.isEmpty(charDisplay.getSpellBookNameToAutoAddKnown()))
-			{
-				addToSpellBook(node, charDisplay.getSpellBookNameToAutoAddKnown());
-			}
-
-		}
-		updateSpellsTodo();
-		pcFacade.refreshAvailableTempBonuses();
-	}
-
-	@Override
-	public void removeKnownSpell(SpellNode spell)
-	{
-		//TODO: This should also remove the spell from books and lists
-		if (removeSpellFromCharacter(spell, Globals.getDefaultSpellBook()))
-		{
-			allKnownSpellNodes.removeElement(spell);
-			knownSpellNodes.removeElement(spell);
-		}
-		updateSpellsTodo();
-		pcFacade.refreshAvailableTempBonuses();
-	}
-
-	@Override
-	public void addPreparedSpell(SpellNode spell, String spellList, boolean useMetamagic)
-	{
-		List<Ability> metamagicFeats = new ArrayList<>();
-		if (useMetamagic)
-		{
-			metamagicFeats = queryUserForMetamagic(spell);
-			if (metamagicFeats == null)
-			{
-				return;
-			}
-		}
-		SpellNode node = addSpellToCharacter(spell, spellList, metamagicFeats);
-		if (node != null)
-		{
-			if (preparedSpellNodes.containsElement(node))
-			{
-				SpellNode spellNode = preparedSpellNodes.getElementAt(preparedSpellNodes.getIndexOfElement(node));
-				spellNode.addCount(1);
-				// Remove and read to ensure the display is updated
-				preparedSpellNodes.removeElement(spellNode);
-				preparedSpellNodes.addElement(spellNode);
-			}
-			else
-			{
-				preparedSpellNodes.addElement(node);
-			}
-			// Remove dummy spelllist node from the list
-			for (Iterator<SpellNode> iterator = preparedSpellNodes.iterator(); iterator.hasNext();)
-			{
-				SpellNode sn = iterator.next();
-				if (sn.getSpell() == null && spellList.equals(sn.getRootNode().getName()))
-				{
-					iterator.remove();
-				}
-
-			}
-		}
-	}
-
 	private void updateSpellsTodo()
 	{
 		boolean hasFree = false;
@@ -406,27 +286,6 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		return availableList;
 	}
 
-	@Override
-	public void removePreparedSpell(SpellNode spell, String spellList)
-	{
-		if (removeSpellFromCharacter(spell, spellList))
-		{
-			if (spell.getCount() > 1)
-			{
-				spell.addCount(-1);
-				// Remove and readd to ensure the display is updated
-				preparedSpellNodes.removeElement(spell);
-				preparedSpellNodes.addElement(spell);
-			}
-			else
-			{
-				preparedSpellNodes.removeElement(spell);
-			}
-
-			addDummyNodeIfSpellListEmpty(spellList);
-		}
-	}
-
 	/**
 	 * If there are no spells in the spell list, add in the spell list 
 	 * placeholder node so that the list shows in the UI.
@@ -453,140 +312,6 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 					preparedSpellNodes.addElement(listNode);
 				}
 			}
-		}
-	}
-
-	@Override
-	public void addSpellList(String spellList)
-	{
-		if (StringUtils.isEmpty(spellList))
-		{
-			return;
-		}
-
-		// Prevent spellbooks being given the same name as a class
-		for (PCClass current : Globals.getContext().getReferenceContext().getConstructedCDOMObjects(PCClass.class))
-		{
-			if ((spellList.equals(current.getKeyName())))
-			{
-				JOptionPane.showMessageDialog(null, LanguageBundle.getString("in_spellbook_name_error"), //$NON-NLS-1$
-					Constants.APPLICATION_NAME, JOptionPane.ERROR_MESSAGE);
-
-				return;
-			}
-		}
-
-		if (pc.addSpellBook(spellList))
-		{
-			pc.setDirty(true);
-
-			DummySpellNodeImpl spellListNode = new DummySpellNodeImpl(getRootNode(spellList));
-			preparedSpellLists.add(spellListNode);
-			addDummyNodeIfSpellListEmpty(spellList);
-		}
-		else
-		{
-			JOptionPane.showMessageDialog(null,
-				LanguageBundle.getFormattedString("InfoPreparedSpells.add.list.fail", spellList), //$NON-NLS-1$
-				Constants.APPLICATION_NAME, JOptionPane.ERROR_MESSAGE);
-
-			return;
-		}
-	}
-
-	@Override
-	public void removeSpellList(String spellList)
-	{
-		if (spellList.equalsIgnoreCase(Globals.getDefaultSpellBook()))
-		{
-			Logging.errorPrint(LanguageBundle.getString("InfoSpells.can.not.delete.default.spellbook")); //$NON-NLS-1$
-
-			return;
-		}
-
-		if (pc.delSpellBook(spellList))
-		{
-			pc.setDirty(true);
-			for (Iterator<SpellNode> iterator = preparedSpellLists.iterator(); iterator.hasNext();)
-			{
-				SpellNode listNode = iterator.next();
-				if (spellList.equals(listNode.getRootNode().getName()))
-				{
-					iterator.remove();
-				}
-			}
-
-			for (Iterator<SpellNode> iterator = preparedSpellNodes.iterator(); iterator.hasNext();)
-			{
-				SpellNode spell = iterator.next();
-				if (spellList.equals(spell.getRootNode().getName()))
-				{
-					iterator.remove();
-				}
-			}
-		}
-		else
-		{
-			Logging.errorPrint("delBookButton:failed "); //$NON-NLS-1$
-
-			return;
-		}
-	}
-
-	@Override
-	public void addToSpellBook(SpellNode spell, String spellBook)
-	{
-		String bookName = spellBook;
-		if (bookName.endsWith("]") && bookName.contains(" ["))
-		{
-			bookName = bookName.substring(0, bookName.lastIndexOf(" ["));
-		}
-		SpellNode node = addSpellToCharacter(spell, bookName, new ArrayList<>());
-		if (node != null)
-		{
-			if (bookSpellNodes.containsElement(node))
-			{
-				SpellNode spellNode = bookSpellNodes.getElementAt(bookSpellNodes.getIndexOfElement(node));
-				spellNode.addCount(1);
-				// Remove and read to ensure the display is updated
-				bookSpellNodes.removeElement(spellNode);
-				bookSpellNodes.addElement(spellNode);
-			}
-			else
-			{
-				bookSpellNodes.addElement(node);
-			}
-			// Remove dummy spellbook node from the list
-			for (Iterator<SpellNode> iterator = bookSpellNodes.iterator(); iterator.hasNext();)
-			{
-				SpellNode sn = iterator.next();
-				if (sn.getSpell() == null && bookName.equals(sn.getRootNode().getName()))
-				{
-					iterator.remove();
-				}
-
-			}
-		}
-	}
-
-	@Override
-	public void removeFromSpellBook(SpellNode spell, String spellBook)
-	{
-		if (removeSpellFromCharacter(spell, spellBook))
-		{
-			if (spell.getCount() > 1)
-			{
-				spell.addCount(-1);
-				// Remove and readd to ensure the display is updated
-				bookSpellNodes.removeElement(spell);
-				bookSpellNodes.addElement(spell);
-			}
-			else
-			{
-				bookSpellNodes.removeElement(spell);
-			}
-
-			addDummyNodeIfSpellBookEmpty(spellBook);
 		}
 	}
 
@@ -625,129 +350,6 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		buildAvailableNodes();
 		buildKnownPreparedNodes();
 		updateSpellsTodo();
-	}
-
-	@Override
-	public String getClassInfo(PCClass aClass)
-	{
-		SpellSupportForPCClass spellSupport = pc.getSpellSupport(aClass);
-		int highestSpellLevel = spellSupport.getHighestLevelSpell(pc);
-
-		final HtmlInfoBuilder b = new HtmlInfoBuilder();
-		b.append("<table border=1><tr><td><font size=-2><b>"); //$NON-NLS-1$
-		b.append(OutputNameFormatting.piString(aClass)).append(" ["); //$NON-NLS-1$
-		b.append(
-			String.valueOf(
-				charDisplay.getLevel(aClass) + (int) pc.getTotalBonusTo("PCLEVEL", aClass.getKeyName()))); //$NON-NLS-1$
-		b.append("]</b></font></td>"); //$NON-NLS-1$
-
-		for (int i = 0; i <= highestSpellLevel; ++i)
-		{
-			b.append("<td><font size=-2><b><center>&nbsp;"); //$NON-NLS-1$
-			b.append(String.valueOf(i));
-			b.append("&nbsp;</b></center></font></td>"); //$NON-NLS-1$
-		}
-
-		b.append("</tr>"); //$NON-NLS-1$
-		b.append("<tr><td><font size=-1><b>Cast</b></font></td>"); //$NON-NLS-1$
-
-		for (int i = 0; i <= highestSpellLevel; ++i)
-		{
-			b.append("<td><font size=-1><center>"); //$NON-NLS-1$
-			b.append(getNumCast(aClass, i, pc));
-			b.append("</center></font></td>"); //$NON-NLS-1$
-		}
-		b.append("</tr>"); //$NON-NLS-1$
-
-		// Making sure KnownList can be handled safely and produces the correct behavior
-		if (spellSupport.hasKnownList() || spellSupport.hasKnownSpells(pc))
-		{
-			b.append("<tr><td><font size=-1><b>Known</b></font></td>"); //$NON-NLS-1$
-
-			for (int i = 0; i <= highestSpellLevel; ++i)
-			{
-				final int a = spellSupport.getKnownForLevel(i, pc);
-				final int bonus = spellSupport.getSpecialtyKnownForLevel(i, pc);
-
-				b.append("<td><font size=-1><center>"); //$NON-NLS-1$
-				b.append(String.valueOf(a));
-				if (bonus > 0)
-				{
-					b.append('+').append(Integer.toString(bonus));
-				}
-				b.append("</center></font></td>"); //$NON-NLS-1$
-			}
-			b.append("</tr>"); //$NON-NLS-1$
-		}
-
-		b.append("<tr><td><font size=-1><b>DC</b></font></td>"); //$NON-NLS-1$
-
-		for (int i = 0; i <= highestSpellLevel; ++i)
-		{
-			b.append("<td><font size=-1><center>"); //$NON-NLS-1$
-			b.append(String.valueOf(getDC(aClass, i, pc)));
-			b.append("</center></font></td>"); //$NON-NLS-1$
-		}
-
-		b.append("</tr></table>"); //$NON-NLS-1$
-
-		b.appendI18nElement("InfoSpells.caster.type", aClass.getSpellType()); //$NON-NLS-1$
-		b.appendLineBreak();
-		b.appendI18nElement("InfoSpells.stat.bonus", aClass.getSpellBaseStat()); //$NON-NLS-1$ 
-
-		if (pc.hasAssocs(aClass, AssociationKey.SPECIALTY) || charDisplay.hasDomains())
-		{
-			boolean needComma = false;
-			StringBuilder schoolInfo = new StringBuilder();
-			String spec = pc.getAssoc(aClass, AssociationKey.SPECIALTY);
-			if (spec != null)
-			{
-				schoolInfo.append(spec);
-				needComma = true;
-			}
-
-			for (Domain d : charDisplay.getSortedDomainSet())
-			{
-				if (needComma)
-				{
-					schoolInfo.append(',');
-				}
-				needComma = true;
-				schoolInfo.append(d.getKeyName());
-			}
-			b.appendLineBreak();
-			b.appendI18nElement("InfoSpells.school", schoolInfo.toString()); //$NON-NLS-1$ 
-		}
-
-		Set<String> set = new TreeSet<>();
-		for (SpellProhibitor sp : aClass.getSafeListFor(ListKey.PROHIBITED_SPELLS))
-		{
-			set.addAll(sp.getValueList());
-		}
-
-		Collection<? extends SpellProhibitor> prohibList = charDisplay.getProhibitedSchools(aClass);
-		if (prohibList != null)
-		{
-			for (SpellProhibitor sp : prohibList)
-			{
-				set.addAll(sp.getValueList());
-			}
-		}
-		if (!set.isEmpty())
-		{
-			b.appendLineBreak();
-			b.appendI18nElement("InfoSpells.prohibited.school", //$NON-NLS-1$ 
-				StringUtil.join(set, ",")); //$NON-NLS-1$ 
-		}
-
-		String bString = SourceFormat.getFormattedString(aClass, Globals.getSourceDisplay(), true);
-		if (!bString.isEmpty())
-		{
-			b.appendLineBreak();
-			b.appendI18nElement("in_source", bString); //$NON-NLS-1$ 
-		}
-
-		return b.toString();
 	}
 
 	private static String getNumCast(PCClass aClass, int level, PlayerCharacter pc)
@@ -1056,42 +658,6 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 		return castingClasses;
 	}
 
-	@Override
-	public boolean isAutoSpells()
-	{
-		return pc.getAutoSpells();
-	}
-
-	@Override
-	public void setAutoSpells(boolean autoSpells)
-	{
-		pc.setAutoSpells(autoSpells);
-	}
-
-	@Override
-	public boolean isUseHigherKnownSlots()
-	{
-		return pc.getUseHigherKnownSlots();
-	}
-
-	@Override
-	public void setUseHigherPreppedSlots(boolean useHigher)
-	{
-		pc.setUseHigherPreppedSlots(useHigher);
-	}
-
-	@Override
-	public boolean isUseHigherPreppedSlots()
-	{
-		return pc.getUseHigherPreppedSlots();
-	}
-
-	@Override
-	public void setUseHigherKnownSlots(boolean useHigher)
-	{
-		pc.setUseHigherKnownSlots(useHigher);
-	}
-
 	/**
 	 * @return the list of spell books
 	 */
@@ -1099,32 +665,6 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 	public ListFacade<String> getSpellbooks()
 	{
 		return spellBookNames;
-	}
-
-	/**
-	 * @return the defaultSpellBook The name of the spell book to hold any new known spells.
-	 */
-	@Override
-	public DefaultReferenceFacade<String> getDefaultSpellBookRef()
-	{
-		return defaultSpellBook;
-	}
-
-	/**
-	 * Set the spell book to hold any new known spells.
-	 * @param bookName The name of the new default spell book.
-	 */
-	@Override
-	public void setDefaultSpellBook(String bookName)
-	{
-		SpellBook book = charDisplay.getSpellBookByName(bookName);
-		if (book == null || book.getType() != SpellBook.TYPE_SPELL_BOOK)
-		{
-			return;
-		}
-
-		pc.setSpellBookNameToAutoAddKnown(bookName);
-		defaultSpellBook.set(bookName);
 	}
 
 	@Override
@@ -1234,117 +774,6 @@ public class SpellSupportFacadeImpl implements SpellSupportFacade, EquipmentList
 			return true;
 		}
 
-	}
-
-	@Override
-	public void previewSpells()
-	{
-		boolean aBool = SettingsHandler.getPrintSpellsWithPC();
-		SettingsHandler.setPrintSpellsWithPC(true);
-
-		String templateFileName = PCGenSettings.getInstance().getProperty(PCGenSettings.SELECTED_SPELL_SHEET_PATH);
-		if (StringUtils.isEmpty(templateFileName))
-		{
-			delegate.showErrorMessage(
-				Constants.APPLICATION_NAME, LanguageBundle.getString("in_spellNoSheet")); //$NON-NLS-1$
-			return;
-		}
-		File templateFile = new File(templateFileName);
-
-		File outputFile = BatchExporter.getTempOutputFilename(templateFile);
-
-		boolean success;
-		if (ExportUtilities.isPdfTemplate(templateFile))
-		{
-			success = BatchExporter.exportCharacterToPDF(pcFacade, outputFile, templateFile);
-		}
-		else
-		{
-			success = exportCharacterToNonPDF(pcFacade, outputFile, templateFile);
-		}
-		if (success)
-		{
-			try
-			{
-				DesktopBrowserLauncher.viewInBrowser(outputFile);
-			}
-			catch (IOException e)
-			{
-				Logging.errorPrint("SpellSupportFacadeImpl.previewSpells failed", e);
-				delegate.showErrorMessage(
-					Constants.APPLICATION_NAME, LanguageBundle.getString("in_spellPreviewFail")); //$NON-NLS-1$
-			}
-		}
-		SettingsHandler.setPrintSpellsWithPC(aBool);
-	}
-
-	@Override
-	public void exportSpells()
-	{
-		final String template = PCGenSettings.getInstance().getProperty(PCGenSettings.SELECTED_SPELL_SHEET_PATH);
-		if (StringUtils.isEmpty(template))
-		{
-			delegate.showErrorMessage(
-				Constants.APPLICATION_NAME, LanguageBundle.getString("in_spellNoSheet")); //$NON-NLS-1$
-			return;
-		}
-
-		FileChooser fxExport = new FileChooser();
-		fxExport.setTitle(LanguageBundle.getString("InfoSpells.export.spells.for") + charDisplay.getDisplayName());
-		fxExport.setInitialDirectory(new File(PCGenSettings.getPcgDir()));
-		File file = GuiUtility.runOnJavaFXThreadNow(() -> fxExport.showSaveDialog(null));
-		if (file == null)
-		{
-			return;
-		}
-
-		try
-		{
-			final String aFileName = file.getAbsolutePath();
-			final File outFile = new File(aFileName);
-
-			if (outFile.exists())
-			{
-				int reallyClose = JOptionPane.showConfirmDialog(null,
-					LanguageBundle.getFormattedString("InfoSpells.confirm.overwrite", outFile.getName()), //$NON-NLS-1$
-					LanguageBundle.getFormattedString("InfoSpells.overwriting", //$NON-NLS-1$
-						outFile.getName()),
-					JOptionPane.YES_NO_OPTION);
-
-				if (reallyClose != JOptionPane.YES_OPTION)
-				{
-					return;
-				}
-			}
-
-			// Output the file
-			File templateFile = new File(template);
-			boolean success;
-			if (ExportUtilities.isPdfTemplate(templateFile))
-			{
-				success = BatchExporter.exportCharacterToPDF(pcFacade, outFile, templateFile);
-			}
-			else
-			{
-				success = exportCharacterToNonPDF(pcFacade, outFile, templateFile);
-			}
-
-			if (!success)
-			{
-				delegate.showErrorMessage(Constants.APPLICATION_NAME,
-					LanguageBundle.getFormattedString(
-						"InfoSpells.export.failed", charDisplay.getDisplayName())); //$NON-NLS-1$ 
-			}
-		}
-		catch (Exception ex)
-		{
-			Logging.errorPrint(
-				LanguageBundle.getFormattedString(
-					"InfoSpells.export.failed", charDisplay.getDisplayName()), ex); //$NON-NLS-1$
-			delegate.showErrorMessage(Constants.APPLICATION_NAME,
-				LanguageBundle.getFormattedString(
-					"InfoSpells.export.failed.retry", charDisplay.getDisplayName())); //$NON-NLS-1$ 
-		}
 	}
 
 	/**
