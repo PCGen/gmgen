@@ -40,7 +40,7 @@ javafx {
 
 group = 'net.sourceforge.pcgen'
 
-description = """PCGen"""
+description = """GMGen"""
 
 defaultTasks 'build'
 
@@ -200,7 +200,6 @@ dependencies {
     testCompile group: 'org.testfx', name: 'testfx-junit5', version: '4.0.16-alpha'
     testCompile group: 'org.testfx', name: 'openjfx-monocle', version: 'jdk-12.0.1+2'
 
-
     testCompile group: 'org.xmlunit', name: 'xmlunit-matchers', version:'2.6.3'
 }
 
@@ -221,7 +220,7 @@ ext {
 jar {
     it.dependsOn 'jar-all-plugins'
     manifest {
-        attributes 'Implementation-Title': 'PCGen', 'Implementation-Version': version,
+        attributes 'Implementation-Title': 'PCGen', 'Implementation-Version': archiveVersion,
                 'Main-Class': 'pcgen.system.Main', 'Class-Path': classpath
     }
     from {
@@ -250,32 +249,12 @@ runtime {
     ]
 }
 
-task converterJar(type: Jar, dependsOn: jar) {
-    manifest {
-        attributes 'Implementation-Title': 'PCGen Data Converter', 'Implementation-Version': version,
-                'Main-Class': 'pcgen.gui2.converter.PCGenDataConvert', 'Class-Path': 'pcgen.jar' + classpath
-    }
-
-    archiveClassifier.set('batch-convert')
-    from {
-        configurations.runtimeClasspath.collect { it.directory ? it : zipTree(it) }
-    }
-
-    from sourceSets.main.output
-    include 'none'
-}
-
-artifacts {
-    archives converterJar
-}
-
 task copyToLibs(type: Copy) {
     into "$buildDir/libs"
     from configurations.runtime
 }
 
-task copyToOutput(type: Copy, dependsOn: [createExe, copyToLibs, jar,
-                                          converterJar]) {
+task copyToOutput(type: Copy, dependsOn: [createExe, copyToLibs, jar]) {
     from "$buildDir/libs/pcgen-${version}.jar"
     from "$buildDir/libs/pcgen-${version}-batch-convert.jar"
     from "$buildDir/launch4j/pcgen.exe"

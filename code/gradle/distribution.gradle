@@ -92,7 +92,7 @@ ext {
     }
 }
 
-task fullZip(type: Zip, dependsOn: ['converterJar', 'copyToLibs', 'copyToOutput', \
+task fullZip(type: Zip, dependsOn: ['copyToLibs', 'copyToOutput', \
 'downloadJRE']) {
     classifier = 'full'
     into(zipRootFolder) {
@@ -107,7 +107,7 @@ task fullZip(type: Zip, dependsOn: ['converterJar', 'copyToLibs', 'copyToOutput'
     }
 }
 
-task testZip(type: Zip, dependsOn: ['converterJar', 'copyToLibs', \
+task testZip(type: Zip, dependsOn: ['copyToLibs', \
 'copyToOutput']) {
     classifier = 'test'
     into(zipRootFolder) {
@@ -136,7 +136,7 @@ task docsZip(type: Zip) {
     }
 }
 
-task programZip(type: Zip, dependsOn: 'converterJar') {
+task programZip(type: Zip) {
     classifier = 'program'
     into(zipRootFolder) {
         with programDistsImage

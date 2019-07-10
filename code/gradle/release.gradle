@@ -105,8 +105,8 @@ ext {
 	}
 
 task layoutNsisBase(type: Copy, dependsOn: [createExe, copyToLibs, 
-        jar, converterJar]) {
-    description="Assemble the required files for all PCGen installations"
+        jar]) {
+    description="Assemble the required files for all GMGen installations"
     //doFirst {
     // Release notes are required! Causes Autobuild Problem
     //assert file(releaseNotes).exists()
@@ -169,7 +169,7 @@ launch4j {
     splashTimeout = 60
     splashTimeoutError = true
     //Can't be longer than 150 characters
-    copyright = "PCGen's source-code is distributed under the GNU Lesser General Public License (LGPL)"
+    copyright = "GMGen's source-code is distributed under the GNU Lesser General Public License (LGPL)"
     version = "${shortVerNum}"
     jvmOptions = ["-Dsun.java2d.dpiaware=false"]
     downloadUrl = "https://jdk.java.net/"
