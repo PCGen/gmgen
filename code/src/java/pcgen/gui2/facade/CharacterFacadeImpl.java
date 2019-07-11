@@ -51,7 +51,6 @@ import pcgen.cdom.enumeration.ListKey;
 import pcgen.cdom.enumeration.NumericPCAttribute;
 import pcgen.cdom.enumeration.ObjectKey;
 import pcgen.cdom.enumeration.PCStringKey;
-import pcgen.cdom.enumeration.SkillFilter;
 import pcgen.cdom.facet.AutoEquipmentFacet;
 import pcgen.cdom.facet.FacetLibrary;
 import pcgen.cdom.facet.event.DataFacetChangeEvent;
@@ -200,8 +199,6 @@ public class CharacterFacadeImpl
 	private DefaultReferenceFacade<Integer> xpForNextlevel;
 	private DefaultReferenceFacade<String> xpTableName;
 	private DefaultReferenceFacade<String> characterType;
-	private DefaultReferenceFacade<String> previewSheet;
-	private DefaultReferenceFacade<SkillFilter> skillFilter;
 	private DefaultReferenceFacade<Integer> age;
 	private DefaultReferenceFacade<String> ageCategory;
 	private DefaultListFacade<String> ageCategoryList;
@@ -213,7 +210,6 @@ public class CharacterFacadeImpl
 	private DefaultReferenceFacade<Integer> numBonusLang;
 	private DefaultReferenceFacade<Integer> numSkillLang;
 	private DefaultReferenceFacade<Integer> hpRef;
-	private DefaultReferenceFacade<Integer> rollMethodRef;
 	private DefaultReferenceFacade<String> carriedWeightRef;
 	private DefaultReferenceFacade<String> loadRef;
 	private DefaultReferenceFacade<String> weightLimitRef;
@@ -224,7 +220,6 @@ public class CharacterFacadeImpl
 	private DefaultListFacade<PCTemplate> templates;
 	private DefaultListFacade<Kit> kitList;
 	private DefaultReferenceFacade<File> portrait;
-	private RectangleReference cropRect;
 	private String selectedGender;
 	private List<Language> currBonusLangs;
 	private DefaultReferenceFacade<String> skinColor;
@@ -234,7 +229,6 @@ public class CharacterFacadeImpl
 	private DefaultReferenceFacade<Integer> weightRef;
 	private DefaultReferenceFacade<BigDecimal> fundsRef;
 	private DefaultReferenceFacade<BigDecimal> wealthRef;
-	private DefaultReferenceFacade<GearBuySellFacade> gearBuySellSchemeRef;
 
 	private Gui2InfoFactory infoFactory;
 	private CharacterAbilities characterAbilities;
@@ -245,7 +239,7 @@ public class CharacterFacadeImpl
 	private boolean allowDebt;
 
 	private int lastExportCharSerial = 0;
-	private PlayerCharacter lastExportChar = null;
+	private PlayerCharacter lastExportChar;
 	private LanguageListener langListener;
 	private TemplateListener templateListener;
 	private XPListener xpListener;
@@ -328,10 +322,7 @@ public class CharacterFacadeImpl
 			portraitFile = new File(charDisplay.getPortraitPath());
 		}
 		portrait = new DefaultReferenceFacade<>(portraitFile);
-		cropRect = new RectangleReference(charDisplay.getPortraitThumbnailRect());
 		characterType = new DefaultReferenceFacade<>(charDisplay.getCharacterType());
-		previewSheet = new DefaultReferenceFacade<>(charDisplay.getPreviewSheet());
-		skillFilter = new DefaultReferenceFacade<>(charDisplay.getSkillFilter());
 
 		tabName = new DefaultReferenceFacade<>(charDisplay.getTabName());
 		playersName = new DefaultReferenceFacade<>(charDisplay.getPlayersName());
@@ -359,7 +350,6 @@ public class CharacterFacadeImpl
 			}
 		}
 
-		GameMode game = dataSet.getGameMode();
 		if (theCharacter.isFeatureEnabled(CControl.ALIGNMENTFEATURE))
 		{
 			alignment = CoreInterfaceUtilities.getReferenceFacade(
@@ -392,8 +382,6 @@ public class CharacterFacadeImpl
 		equipmentSets = new DefaultListFacade<>();
 		initEquipSet();
 
-		rollMethodRef = new DefaultReferenceFacade<>(game.getRollMethod());
-
 		charLevelsFacade = new CharacterLevelsFacadeImpl(theCharacter, delegate, todoManager, dataSet, this);
 		pcClasses = new ArrayList<>();
 		pcClassLevels = new DefaultListFacade<>();
@@ -410,8 +398,6 @@ public class CharacterFacadeImpl
 		templates = new DefaultListFacade<>(charDisplay.getDisplayVisibleTemplateList());
 		templateListener = new TemplateListener();
 		FacetLibrary.getFacet(TemplateFacet.class).addDataFacetChangeListener(templateListener);
-
-		initTodoList();
 
 		statTotalLabelText = new DefaultReferenceFacade<>();
 		statTotalText = new DefaultReferenceFacade<>();
@@ -430,7 +416,6 @@ public class CharacterFacadeImpl
 		purchasedEquip.addEquipmentListListener(spellSupportFacade);
 		fundsRef = new DefaultReferenceFacade<>(theCharacter.getGold());
 		wealthRef = new DefaultReferenceFacade<>(theCharacter.totalValue());
-		gearBuySellSchemeRef = new DefaultReferenceFacade<>(findGearBuySellRate());
 		allowDebt = false;
 	}
 
@@ -549,30 +534,12 @@ public class CharacterFacadeImpl
 	}
 
 	/**
-	 * Create an initial list of todo items 
-	 */
-	private void initTodoList()
-	{
-		if (isNewCharName(charDisplay.getName()))
-		{
-			todoManager.addTodo(new TodoFacadeImpl(Tab.SUMMARY, "Name", "in_sumTodoName", 1));
-		}
-		if (charDisplay.getRace() == null || charDisplay.getRace().isUnselected())
-		{
-			todoManager.addTodo(new TodoFacadeImpl(Tab.SUMMARY, "Race", "in_irTodoRace", 100));
-		}
-
-		// Stats todo already done in updateScorePurchasePool
-		updateLevelTodo();
-	}
-
-	/**
 	 * Identify if the supplied name is a default one generated by the system
 	 * e.g. Unnamed 1 or Unnamed 2
 	 * @param charName The name to be checked.
 	 * @return True if the name is a default.
 	 */
-	private boolean isNewCharName(String charName)
+	private static boolean isNewCharName(String charName)
 	{
 		if (charName == null)
 		{
@@ -1284,11 +1251,6 @@ public class CharacterFacadeImpl
 	@Override
 	public void setRace(Race race)
 	{
-		// TODO: We don't have a HP dialog implemented yet, so don't try to show it
-		SettingsHandler.setShowHPDialogAtLevelUp(false);
-		//SettingsHandler.setShowStatDialogAtLevelUp(false);
-		int oldLevel = charLevelsFacade.getSize();
-
 		if (race == null)
 		{
 			race = RaceUtilities.getUnselectedRace();
@@ -1305,11 +1267,6 @@ public class CharacterFacadeImpl
 			setGender(selectedGender);
 		}
 		refreshRaceRelatedFields();
-
-		if (oldLevel != charLevelsFacade.getSize())
-		{
-			delegate.showLevelUpInfo(this, oldLevel);
-		}
 	}
 
 	private void refreshRaceRelatedFields()
@@ -2569,7 +2526,6 @@ public class CharacterFacadeImpl
 
 				if (oldLevel != charLevelsFacade.getSize())
 				{
-					delegate.showLevelUpInfo(this, oldLevel);
 				}
 			}
 			else

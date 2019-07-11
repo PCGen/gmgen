@@ -78,16 +78,6 @@ public interface UIDelegate
 	void showInfoMessage(String title, String message);
 
 	/**
-	 * This displays a dialog containing a summary of character changes
-	 * that occurred after levels were added to the character.<br>
-	 * This should be called after relevant levels have been added to the
-	 * given character.
-	 * @param character the character that levelled up
-	 * @param oldLevel the level of the character before the levelup
-	 */
-	void showLevelUpInfo(CharacterFacade character, int oldLevel);
-
-	/**
 	 * Display a modal dialog to a user requesting that they select one or more 
 	 * choices. The rules for what selections are available and how many 
 	 * selections can be made are contained in the chooserFacade. The selected 

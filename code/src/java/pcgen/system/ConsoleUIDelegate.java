@@ -21,7 +21,6 @@ package pcgen.system;
 
 import java.util.Optional;
 
-import pcgen.facade.core.CharacterFacade;
 import pcgen.facade.core.ChooserFacade;
 import pcgen.facade.core.UIDelegate;
 import pcgen.util.Logging;
@@ -54,12 +53,6 @@ public class ConsoleUIDelegate implements UIDelegate
 	public void showInfoMessage(String title, String message)
 	{
 		Logging.log(Logging.INFO, title + " - " + message);
-	}
-
-	@Override
-	public void showLevelUpInfo(CharacterFacade character, int oldLevel)
-	{
-		Logging.log(Logging.INFO, "Level up from " + oldLevel + " complete for character " + character);
 	}
 
 	@Override
