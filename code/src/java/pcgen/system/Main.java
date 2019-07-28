@@ -60,7 +60,6 @@ import javafx.embed.swing.JFXPanel;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
-import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -324,11 +323,6 @@ public final class Main
 		parser.addArgument("-v", "--verbose").help("verbose logging").type(Boolean.class).action(Arguments.count());
 
 		parser.addArgument("-V", "--version").action(Arguments.version());
-
-		MutuallyExclusiveGroup startupMode =
-				parser.addMutuallyExclusiveGroup().description("start up on a specific mode");
-
-		startupMode.addArgument("-D", "--tab").nargs(1);
 
 		parser.addArgument("-s", "--settingsdir").nargs(1)
 			.type(Arguments.fileType().verifyIsDirectory().verifyCanRead().verifyExists());
