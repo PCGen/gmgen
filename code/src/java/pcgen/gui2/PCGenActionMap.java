@@ -57,15 +57,6 @@ public final class PCGenActionMap extends ActionMap
 
 	//the File menu commands
 	private static final String FILE_COMMAND = "file";
-	private static final String NEW_COMMAND = FILE_COMMAND + ".new";
-	private static final String OPEN_COMMAND = FILE_COMMAND + ".open";
-	private static final String OPEN_RECENT_COMMAND = FILE_COMMAND + ".openrecent";
-	private static final String CLOSE_COMMAND = FILE_COMMAND + ".close";
-	private static final String CLOSEALL_COMMAND = FILE_COMMAND + ".closeall";
-	private static final String SAVE_COMMAND = FILE_COMMAND + ".save";
-	private static final String SAVEAS_COMMAND = FILE_COMMAND + ".saveas";
-	private static final String SAVEALL_COMMAND = FILE_COMMAND + ".saveall";
-	private static final String REVERT_COMMAND = FILE_COMMAND + ".reverttosaved";
 	private static final String PARTY_COMMAND = FILE_COMMAND + ".party";
 	private static final String OPEN_PARTY_COMMAND = PARTY_COMMAND + ".open";
 	private static final String OPEN_RECENT_PARTY_COMMAND = PARTY_COMMAND + ".openrecent";
@@ -75,14 +66,10 @@ public final class PCGenActionMap extends ActionMap
 	private static final String EXIT_COMMAND = FILE_COMMAND + ".exit";
 	//the Edit menu commands
 	private static final String EDIT_COMMAND = "edit";
-	static final String ADD_KIT_COMMAND = EDIT_COMMAND + ".addkit";
-	private static final String TEMP_BONUS_COMMAND = EDIT_COMMAND + ".tempbonus";
-	private static final String EQUIPMENTSET_COMMAND = EDIT_COMMAND + ".equipmentset";
 	//the Source menu commands
 	private static final String SOURCES_COMMAND = "sources";
 	private static final String SOURCES_RELOAD_COMMAND = SOURCES_COMMAND + ".reload";
 	private static final String SOURCES_UNLOAD_COMMAND = SOURCES_COMMAND + ".unload";
-	private static final String INSTALL_DATA_COMMAND = SOURCES_COMMAND + ".installData";
 	//the tools menu commands
 	private static final String TOOLS_COMMAND = "tools";
 	static final String LOG_COMMAND = TOOLS_COMMAND + ".log";
@@ -127,8 +114,6 @@ public final class PCGenActionMap extends ActionMap
 		put(EXIT_COMMAND, new ExitAction());
 
 		put(EDIT_COMMAND, new EditAction());
-		put(EQUIPMENTSET_COMMAND, new EquipmentSetAction());
-		put(TEMP_BONUS_COMMAND, new TempBonusAction());
 		put(LOG_COMMAND, new DebugAction());
 		put(LOGGING_LEVEL_COMMAND, new LoggingLevelAction());
 		put(CALCULATOR_COMMAND, new CalculatorAction());
@@ -143,32 +128,12 @@ public final class PCGenActionMap extends ActionMap
 		put(HELP_ABOUT_COMMAND, new AboutHelpAction());
 	}
 
-	private final class EditAction extends PCGenAction
+	private static final class EditAction extends PCGenAction
 	{
 
 		private EditAction()
 		{
 			super(MNU_EDIT);
-		}
-
-	}
-
-	private final class EquipmentSetAction extends PCGenAction
-	{
-
-		private EquipmentSetAction()
-		{
-			super("mnuEditEquipmentSet");
-		}
-
-	}
-
-	private final class TempBonusAction extends PCGenAction
-	{
-
-		private TempBonusAction()
-		{
-			super("mnuEditTempBonus");
 		}
 
 	}
@@ -250,7 +215,7 @@ public final class PCGenActionMap extends ActionMap
 
 	}
 
-	private final class LoggingLevelAction extends PCGenAction
+	private static final class LoggingLevelAction extends PCGenAction
 	{
 
 		private LoggingLevelAction()
@@ -260,7 +225,7 @@ public final class PCGenActionMap extends ActionMap
 
 	}
 
-	private final class FileAction extends PCGenAction
+	private static final class FileAction extends PCGenAction
 	{
 
 		private FileAction()
@@ -270,164 +235,12 @@ public final class PCGenActionMap extends ActionMap
 
 	}
 
-	private final class OpenAction extends PCGenAction
-	{
-
-		private OpenAction()
-		{
-			super("mnuFileOpen", OPEN_COMMAND, "shortcut O", Icons.Open16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.showOpenCharacterChooser();
-		}
-
-	}
-
-	private final class OpenRecentAction extends PCGenAction
+	private static final class OpenRecentAction extends PCGenAction
 	{
 
 		private OpenRecentAction()
 		{
 			super("mnuOpenRecent");
-		}
-
-	}
-
-	private final class CloseAction extends CharacterAction
-	{
-
-		private CloseAction()
-		{
-			super("mnuFileClose", CLOSE_COMMAND, "shortcut W", Icons.Close16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.closeCharacter(frame.getSelectedCharacterRef().get());
-		}
-
-	}
-
-	private final class CloseAllAction extends CharacterAction
-	{
-
-		private CloseAllAction()
-		{
-			super("mnuFileCloseAll", CLOSEALL_COMMAND, Icons.CloseAll16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.closeAllCharacters();
-		}
-
-	}
-
-	private final class SaveAction extends PCGenAction implements ReferenceListener<CharacterFacade>
-	{
-
-		private final FileRefListener fileListener = new FileRefListener();
-
-		private SaveAction()
-		{
-			super("mnuFileSave", SAVE_COMMAND, "shortcut S", Icons.Save16);
-			ReferenceFacade<CharacterFacade> ref = frame.getSelectedCharacterRef();
-			ref.addReferenceListener(this);
-			checkEnabled(ref.get());
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			final CharacterFacade pc = frame.getSelectedCharacterRef().get();
-			if (pc == null)
-			{
-				return;
-			}
-			frame.saveCharacter(pc);
-		}
-
-		@Override
-		public void referenceChanged(ReferenceEvent<CharacterFacade> e)
-		{
-			CharacterFacade oldRef = e.getOldReference();
-			if (oldRef != null)
-			{
-				oldRef.getFileRef().removeReferenceListener(fileListener);
-			}
-			checkEnabled(e.getNewReference());
-		}
-
-		private void checkEnabled(CharacterFacade character)
-		{
-			if (character != null)
-			{
-				ReferenceFacade<File> file = character.getFileRef();
-				file.addReferenceListener(fileListener);
-				setEnabled(file.get() != null);
-			}
-			else
-			{
-				setEnabled(false);
-			}
-		}
-
-		private final class FileRefListener implements ReferenceListener<File>
-		{
-
-			@Override
-			public void referenceChanged(ReferenceEvent<File> e)
-			{
-				setEnabled(e.getNewReference() != null);
-			}
-
-		}
-
-	}
-
-	private final class SaveAsAction extends CharacterAction
-	{
-
-		private SaveAsAction()
-		{
-			super("mnuFileSaveAs", SAVEAS_COMMAND, "shift-shortcut S", Icons.SaveAs16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.showSaveCharacterChooser(frame.getSelectedCharacterRef().get());
-		}
-
-	}
-
-	private final class SaveAllAction extends CharacterAction
-	{
-
-		private SaveAllAction()
-		{
-			super("mnuFileSaveAll", SAVEALL_COMMAND, Icons.SaveAll16);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e)
-		{
-			frame.saveAllCharacters();
-		}
-
-	}
-
-	private final class PartyAction extends PCGenAction
-	{
-
-		private PartyAction()
-		{
-			super("mnuFileParty");
 		}
 
 	}
@@ -653,8 +466,6 @@ public final class PCGenActionMap extends ActionMap
 	private abstract class CharacterAction extends PCGenAction
 	{
 
-		private final ReferenceFacade<?> ref;
-
 		private CharacterAction(String prop, String command, String accelerator)
 		{
 			this(prop, command, accelerator, null);
@@ -668,7 +479,7 @@ public final class PCGenActionMap extends ActionMap
 		private CharacterAction(String prop, String command, String accelerator, Icons icon)
 		{
 			super(prop, command, accelerator, icon);
-			ref = frame.getSelectedCharacterRef();
+			ReferenceFacade<?> ref = frame.getSelectedCharacterRef();
 			ref.addReferenceListener(new CharacterListener());
 			setEnabled(ref.get() != null);
 		}
