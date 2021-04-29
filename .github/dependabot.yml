@@ -1,0 +1,43 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: jep:jep
+    versions:
+    - "> 2.4.1"
+  - dependency-name: xml-apis:xml-apis
+    versions:
+    - ">= 2.a, < 3"
+  - dependency-name: org.springframework:spring-web
+    versions:
+    - 5.3.3
+    - 5.3.4
+    - 5.3.5
+  - dependency-name: org.beryx.runtime
+    versions:
+    - 1.12.1
+    - 1.12.2
+  - dependency-name: com.github.spotbugs
+    versions:
+    - 4.6.0
+    - 4.6.2
+    - 4.7.0
+  - dependency-name: com.github.ben-manes.versions
+    versions:
+    - 0.36.0
+  - dependency-name: org.junit.jupiter:junit-jupiter-engine
+    versions:
+    - 5.7.0
+  - dependency-name: org.junit.jupiter:junit-jupiter-api
+    versions:
+    - 5.7.0
+  - dependency-name: org.junit.platform:junit-platform-launcher
+    versions:
+    - 1.7.0
+  - dependency-name: org.junit.jupiter:junit-jupiter-params
+    versions:
+    - 5.7.0
