@@ -167,7 +167,7 @@ compileJava {
 }
 
 dependencies {
-    compile group: 'commons-io', name: 'commons-io', version:'2.6'
+    compile group: 'commons-io', name: 'commons-io', version:'2.11.0'
     compile group: 'org.springframework', name: 'spring-web', version:'5.3.9'
     compile group: 'org.springframework', name: 'spring-core', version:'5.2.3.RELEASE'
     compile group: 'org.springframework', name: 'spring-beans', version:'5.3.10'
